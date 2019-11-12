@@ -69,6 +69,34 @@ class FiniteAutomatonTest(unittest.TestCase):
             }
         )
 
+    def test_draw(self):
+        dfa = FiniteAutomaton(
+            alphabet={'a', 'b'},
+            states={'q0', 'q1'},
+            initial_states={'q0'},
+            accepting_states={'q1'},
+            transitions={
+                'q0': [('a', 'q1'), ('b', 'q0')],
+                'q1': [('a', 'q1'), ('b', 'q0')]
+            }
+        )
+        ndfa = FiniteAutomaton(
+            alphabet={'a', 'b'},
+            states={'q0', 'q1'},
+            initial_states={'q0'},
+            accepting_states={'q1'},
+            transitions={
+                'q0': [('a', 'q0'), ('b', 'q0'), ('a', 'q1')],
+                'q1': [('a', 'q1'), ('b', 'q1')]
+            }
+        )
+        dfa.draw(
+            name='FiniteAutomatonTest.test_draw.dfa'
+        ).render(directory='out/', format='pdf')
+        ndfa.draw(
+            name='FiniteAutomatonTest.test_draw.ndfa'
+        ).render(directory='out/', format='pdf')
+
     def test_is_deterministic(self):
         dfa = FiniteAutomaton(
             alphabet={'a', 'b'},

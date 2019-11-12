@@ -11,6 +11,10 @@ from typing import (
     Tuple
 )
 
+from graphviz import (
+    Digraph
+)
+
 Letter = str
 Alphabet = Set[Letter]  # pylint: disable=invalid-name
 State = str
@@ -54,6 +58,28 @@ class FiniteAutomaton:
                         f'In transitions for state "{state}": '
                         f'unknown state "{next_state}"'
                     )
+
+    def draw(self, **kwargs) -> Digraph:
+        """Renders the automaton using graphviz
+        """
+        graph = Digraph(**kwargs)
+        graph.node('', shape='point')
+        for state in self._states:
+            if state in self._accepting_states:
+                graph.node(str(state), shape='doublecircle')
+            else:
+                graph.node(str(state), shape='circle')
+            if state in self._initial_states:
+                graph.edge('', str(state))
+        for state in self._transitions:
+            arrows = {}  # type: Dict[State, List[Letter]]
+            for letter, next_state in self._transitions[state]:
+                arrows[next_state] = arrows.get(next_state, []) + [letter]
+            for next_state in arrows:
+                arrows[next_state].sort()
+                label = ", ".join(arrows[next_state])
+                graph.edge(str(state), str(next_state), label=label)
+        return graph
 
     def is_deterministic(self) -> bool:
         """Returns whether the automaton is deterministic or not.
