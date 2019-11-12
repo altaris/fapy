@@ -1,6 +1,9 @@
 """Finite automaton
 """
 
+from copy import (
+    deepcopy
+)
 from typing import (
     Dict,
     List,
@@ -11,6 +14,7 @@ from typing import (
 Letter = str
 Alphabet = Set[Letter]  # pylint: disable=invalid-name
 State = str
+Word = List[Letter]
 
 
 class FiniteAutomaton:
@@ -65,3 +69,18 @@ class FiniteAutomaton:
             if len(letters) != len(set(letters)):
                 return False
         return True
+
+    def read(self, word: Word) -> bool:
+        """Reads a word and returns whether the automaton accepts it or not.
+        """
+        if not set(word).issubset(self._alphabet):
+            raise ValueError(f'Invalid word {word}')
+        current_states = deepcopy(self._initial_states)
+        for letter in word:
+            new_states = set()
+            for state in current_states:
+                for l, q in self._transitions[state]:
+                    if letter == l:
+                        new_states.add(q)
+            current_states = deepcopy(new_states)
+        return bool(self._accepting_states.intersection(current_states))

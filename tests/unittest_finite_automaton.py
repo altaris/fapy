@@ -92,3 +92,25 @@ class FiniteAutomatonTest(unittest.TestCase):
         )
         self.assertTrue(dfa.is_deterministic())
         self.assertFalse(ndfa.is_deterministic())
+
+    def test_read(self):
+        ndfa = FiniteAutomaton(
+            alphabet={'a', 'b'},
+            states={'q0', 'q1'},
+            initial_states={'q0'},
+            accepting_states={'q1'},
+            transitions={
+                'q0': [('a', 'q0'), ('b', 'q0'), ('a', 'q1')],
+                'q1': [('a', 'q1'), ('b', 'q1')]
+            }
+        )
+        with self.assertRaises(ValueError):
+            ndfa.read(['a', 'INVALID'])
+        self.assertTrue(ndfa.read(['a']))
+        self.assertTrue(ndfa.read(['a', 'a']))
+        self.assertTrue(ndfa.read(['a', 'b', 'a']))
+        self.assertTrue(ndfa.read(['a', 'b', 'b']))
+        self.assertFalse(ndfa.read([]))
+        self.assertFalse(ndfa.read(['b']))
+        self.assertFalse(ndfa.read(['b', 'b']))
+        self.assertFalse(ndfa.read(['b', 'b', 'b']))
