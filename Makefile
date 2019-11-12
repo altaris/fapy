@@ -5,7 +5,7 @@ all: typecheck unittest
 
 .PHONY: typecheck
 typecheck:
-	$(TYPECHECK) fa-py/*.py
+	$(TYPECHECK) fapy/*.py
 
 .PHONY: unittest
 unittest:
