@@ -20,7 +20,7 @@ class FiniteAutomatonTest(unittest.TestCase):
                 states={'q0'},
                 initial_states={},
                 accepting_states={},
-                transitions={}
+                transitions=[]
             )
         with self.assertRaises(ValueError):
             FiniteAutomaton(
@@ -28,7 +28,7 @@ class FiniteAutomatonTest(unittest.TestCase):
                 states={'q0'},
                 initial_states={'INVALID'},
                 accepting_states={},
-                transitions={}
+                transitions=[]
             )
         with self.assertRaises(ValueError):
             FiniteAutomaton(
@@ -36,7 +36,7 @@ class FiniteAutomatonTest(unittest.TestCase):
                 states={'q0'},
                 initial_states={'q0'},
                 accepting_states={'INVALID'},
-                transitions={}
+                transitions=[]
             )
         with self.assertRaises(ValueError):
             FiniteAutomaton(
@@ -45,7 +45,7 @@ class FiniteAutomatonTest(unittest.TestCase):
                 initial_states={'q0'},
                 accepting_states={'q0'},
                 transitions={
-                    'q0': {'INVALID': 'q0'}
+                    'q0': [('INVALID', 'q0')]
                 }
             )
         with self.assertRaises(ValueError):
@@ -55,7 +55,7 @@ class FiniteAutomatonTest(unittest.TestCase):
                 initial_states={'q0'},
                 accepting_states={'q0'},
                 transitions={
-                    'q0': {'a': 'INVALID'}
+                    'q0': [('a', 'INVALID')]
                 }
             )
         FiniteAutomaton(
@@ -64,7 +64,31 @@ class FiniteAutomatonTest(unittest.TestCase):
             initial_states={'q0'},
             accepting_states={'q1'},
             transitions={
-                'q0': {'a': 'q1', 'b': 'q0'},
-                'q1': {'a': 'q1', 'b': 'q0'}
+                'q0': [('a', 'q1'), ('b', 'q0')],
+                'q1': [('a', 'q1'), ('b', 'q0')]
             }
         )
+
+    def test_is_deterministic(self):
+        dfa = FiniteAutomaton(
+            alphabet={'a', 'b'},
+            states={'q0', 'q1'},
+            initial_states={'q0'},
+            accepting_states={'q1'},
+            transitions={
+                'q0': [('a', 'q1'), ('b', 'q0')],
+                'q1': [('a', 'q1'), ('b', 'q0')]
+            }
+        )
+        ndfa = FiniteAutomaton(
+            alphabet={'a', 'b'},
+            states={'q0', 'q1'},
+            initial_states={'q0'},
+            accepting_states={'q1'},
+            transitions={
+                'q0': [('a', 'q0'), ('b', 'q0'), ('a', 'q1')],
+                'q1': [('a', 'q1'), ('b', 'q1')]
+            }
+        )
+        self.assertTrue(dfa.is_deterministic())
+        self.assertFalse(ndfa.is_deterministic())

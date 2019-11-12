@@ -3,11 +3,13 @@
 
 from typing import (
     Dict,
-    Set
+    List,
+    Set,
+    Tuple
 )
 
-Alphabet = Set[Letter]  # pylint: disable=invalid-name
 Letter = str
+Alphabet = Set[Letter]  # pylint: disable=invalid-name
 State = str
 
 
@@ -22,7 +24,7 @@ class FiniteAutomaton:
             states: Set[State],
             initial_states: Set[State],
             accepting_states: Set[State],
-            transitions: Dict[State, Dict[Letter, State]]):
+            transitions: Dict[State, List[Tuple[Letter, State]]]):
         self._alphabet = alphabet
         self._states = states
         self._initial_states = initial_states
@@ -37,14 +39,29 @@ class FiniteAutomaton:
         for state in transitions:
             if state not in states:
                 raise ValueError(f'Unknown state "{state}" in transitions')
-            for letter in transitions[state]:
+            for letter, next_state in transitions[state]:
                 if letter not in alphabet:
                     raise ValueError(
                         f'In transitions for state "{state}": '
                         f'unknown letter "{letter}"'
                     )
-                if transitions[state][letter] not in states:
+                if next_state not in states:
                     raise ValueError(
                         f'In transitions for state "{state}": '
-                        f'unknown state "{transitions[state][letter]}"'
+                        f'unknown state "{next_state}"'
                     )
+
+    def is_deterministic(self) -> bool:
+        """Returns whether the automaton is deterministic or not.
+
+        A automaton is deterministic if
+        * it has a unique initial state,
+        * the transition dictionary at any given state is a function.
+        """
+        if len(self._initial_states) != 1:
+            return False
+        for state in self._transitions:
+            letters = [letter for letter, _ in self._transitions[state]]
+            if len(letters) != len(set(letters)):
+                return False
+        return True
