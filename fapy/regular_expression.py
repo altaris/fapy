@@ -164,4 +164,6 @@ class ReParser(Parser):
 
 
 def parse_regular_expression(string: str) -> RegularExpression:
+    """Parses a regular expression, returning an abstract syntax tree.
+    """
     return ReParser().parse(string)
