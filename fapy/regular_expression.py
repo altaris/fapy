@@ -21,7 +21,7 @@ from fapy.common import (
 )
 
 
-class ReAST:
+class RegularExpression:
     """Regular expression abstract syntax tree
     """
 
@@ -34,10 +34,10 @@ class ReAST:
     )
 
     node_type: str
-    left = None  # type: Optional[ReAST]
+    left = None  # type: Optional[RegularExpression]
     letter = None  # type: Optional[Letter]
-    right = None  # type: Optional[ReAST]
-    inner = None  # type: Optional[ReAST]
+    right = None  # type: Optional[RegularExpression]
+    inner = None  # type: Optional[RegularExpression]
 
     def __init__(self, node_type: str, **kwargs):
         self.node_type = node_type
@@ -118,14 +118,14 @@ class ReParser(Parser):
     # pylint: disable=unused-argument
     @attach('e : EPSILON')
     def epsilon(self, epsilon):
-        return ReAST('EPSILON')
+        return RegularExpression('EPSILON')
 
     # pylint: disable=missing-docstring
     # pylint: disable=no-self-use
     # pylint: disable=unused-argument
     @attach('e : LETTER')
     def letter(self, letter):
-        return ReAST('LETTER', letter=letter)
+        return RegularExpression('LETTER', letter=letter)
 
     # pylint: disable=missing-docstring
     # pylint: disable=no-self-use
@@ -139,7 +139,7 @@ class ReParser(Parser):
     # pylint: disable=unused-argument
     @attach('e : e PLUS e')
     def addition(self, left, plus, right):
-        return ReAST('PLUS', left=left, right=right)
+        return RegularExpression('PLUS', left=left, right=right)
 
     # pylint: disable=missing-docstring
     # pylint: disable=no-self-use
@@ -147,9 +147,9 @@ class ReParser(Parser):
     @attach('e : e STAR')
     def star(self, inner, star):
         if inner.node_type == 'STAR':
-            return ReAST('STAR', inner=inner.inner)
+            return RegularExpression('STAR', inner=inner.inner)
         else:
-            return ReAST('STAR', inner=inner)
+            return RegularExpression('STAR', inner=inner)
 
     # pylint: disable=missing-docstring
     # pylint: disable=no-self-use
@@ -160,4 +160,8 @@ class ReParser(Parser):
             return right
         if right.node_type == 'EPSILON':
             return left
-        return ReAST('CONCAT', left=left, right=right)
+        return RegularExpression('CONCAT', left=left, right=right)
+
+
+def parse_regular_expression(string: str) -> RegularExpression:
+    return ReParser().parse(string)
