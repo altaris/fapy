@@ -17,6 +17,7 @@ from purplex import (
 
 # pylint: disable=unused-import
 from fapy.common import (
+    Alphabet,
     Letter
 )
 
@@ -67,6 +68,49 @@ class RegularExpression:
             return 'PLUS(' + repr(self.left) + ', ' + repr(self.right) + ')'
         if self.node_type == 'STAR':
             return 'STAR(' + repr(self.inner) + ')'
+        raise ValueError(f'Unknown node type {self.node_type}')
+
+    def accepts_epsilon(self) -> bool:
+        """Returns whether the regular expression accepts the empty word"""
+        if self.node_type == 'CONCAT':
+            if not self.left:
+                raise ValueError("This should not happen :/")
+            if not self.right:
+                raise ValueError("This should not happen :/")
+            return self.left.accepts_epsilon() and self.right.accepts_epsilon()
+        if self.node_type == 'EPSILON':
+            return True
+        if self.node_type == 'LETTER':
+            return False
+        if self.node_type == 'PLUS':
+            if not self.left:
+                raise ValueError("This should not happen :/")
+            if not self.right:
+                raise ValueError("This should not happen :/")
+            return self.left.accepts_epsilon() or self.right.accepts_epsilon()
+        if self.node_type == 'STAR':
+            return True
+        raise ValueError(f'Unknown node type {self.node_type}')
+
+    def alphabet(self) -> Alphabet:
+        """Returns the alphabet of the regular expression
+        """
+        if self.node_type in ['CONCAT', 'PLUS']:
+            if not self.left:
+                raise ValueError("This should not happen :/")
+            if not self.right:
+                raise ValueError("This should not happen :/")
+            return self.left.alphabet() | self.right.alphabet()
+        if self.node_type == 'EPSILON':
+            return set()
+        if self.node_type == 'LETTER':
+            if not self.letter:
+                raise ValueError("This should not happen :/")
+            return {self.letter}
+        if self.node_type == 'STAR':
+            if not self.inner:
+                raise ValueError("This should not happen :/")
+            return self.inner.alphabet()
         raise ValueError(f'Unknown node type {self.node_type}')
 
     def init_inner(self, **kwargs) -> None:

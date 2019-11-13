@@ -8,8 +8,29 @@ sys.path.insert(0, "../")
 
 # pylint: disable wrong-import-position
 from fapy.regular_expression import (
+    parse_regular_expression,
     ReParser
 )
+
+
+class RegularExpressionTest(unittest.TestCase):
+
+    def test_accepts_epsilon(self):
+        self.assertTrue(parse_regular_expression('ε').accepts_epsilon())
+        self.assertTrue(parse_regular_expression('a*').accepts_epsilon())
+        self.assertTrue(parse_regular_expression('a + ε').accepts_epsilon())
+        self.assertTrue(parse_regular_expression('(a + b)*').accepts_epsilon())
+        self.assertFalse(parse_regular_expression('a').accepts_epsilon())
+        self.assertFalse(parse_regular_expression('a* b').accepts_epsilon())
+
+    def test_alphabet(self):
+        self.assertEqual(parse_regular_expression('ε').alphabet(), set())
+        self.assertEqual(parse_regular_expression('a*').alphabet(), {'a'})
+        self.assertEqual(parse_regular_expression('a + ε').alphabet(), {'a'})
+        self.assertEqual(parse_regular_expression('(a + b)*').alphabet(),
+                         {'a', 'b'})
+        self.assertEqual(parse_regular_expression('a').alphabet(), {'a'})
+        self.assertEqual(parse_regular_expression('a* b').alphabet(), {'a', 'b'})
 
 
 class ReParserTest(unittest.TestCase):
