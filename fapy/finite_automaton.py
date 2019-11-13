@@ -15,7 +15,12 @@ from graphviz import (
     Digraph
 )
 
-from fapy.common import *
+from fapy.common import (
+    Alphabet,
+    Letter,
+    State,
+    Word
+)
 
 
 class FiniteAutomaton:
@@ -119,8 +124,8 @@ class FiniteAutomaton:
         for letter in word:
             new_states = set()
             for state in current_states:
-                for l, q in self.transitions.get(state, []):
-                    if letter == l:
-                        new_states.add(q)
+                for arrow_letter, next_state in self.transitions.get(state, []):
+                    if letter == arrow_letter:
+                        new_states.add(next_state)
             current_states = self.epsilon_closure(new_states)
         return bool(self.accepting_states.intersection(current_states))
