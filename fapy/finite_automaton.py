@@ -30,11 +30,11 @@ class FiniteAutomaton:
             initial_states: Set[State],
             accepting_states: Set[State],
             transitions: Dict[State, List[Tuple[Letter, State]]]):
-        self._alphabet = alphabet
-        self._states = states
-        self._initial_states = initial_states
-        self._accepting_states = accepting_states
-        self._transitions = transitions
+        self.alphabet = alphabet
+        self.states = states
+        self.initial_states = initial_states
+        self.accepting_states = accepting_states
+        self.transitions = transitions
         if not initial_states:
             raise ValueError('An automaton must have at least 1 initial state')
         if not initial_states.issubset(states):
@@ -61,16 +61,16 @@ class FiniteAutomaton:
         """
         graph = Digraph(**kwargs)
         graph.node('', shape='point')
-        for state in self._states:
-            if state in self._accepting_states:
+        for state in self.states:
+            if state in self.accepting_states:
                 graph.node(str(state), shape='doublecircle')
             else:
                 graph.node(str(state), shape='circle')
-            if state in self._initial_states:
+            if state in self.initial_states:
                 graph.edge('', str(state))
-        for state in self._transitions:
+        for state in self.transitions:
             arrows = {}  # type: Dict[State, List[Letter]]
-            for letter, next_state in self._transitions[state]:
+            for letter, next_state in self.transitions[state]:
                 arrows[next_state] = arrows.get(next_state, []) + [letter]
             for next_state in arrows:
                 arrows[next_state].sort()
@@ -85,10 +85,10 @@ class FiniteAutomaton:
         * it has a unique initial state,
         * the transition dictionary at any given state is a function.
         """
-        if len(self._initial_states) != 1:
+        if len(self.initial_states) != 1:
             return False
-        for state in self._transitions:
-            letters = [letter for letter, _ in self._transitions[state]]
+        for state in self.transitions:
+            letters = [letter for letter, _ in self.transitions[state]]
             if len(letters) != len(set(letters)):
                 return False
         return True
@@ -96,14 +96,14 @@ class FiniteAutomaton:
     def read(self, word: Word) -> bool:
         """Reads a word and returns whether the automaton accepts it or not.
         """
-        if not set(word).issubset(self._alphabet):
+        if not set(word).issubset(self.alphabet):
             raise ValueError(f'Invalid word {word}')
-        current_states = deepcopy(self._initial_states)
+        current_states = deepcopy(self.initial_states)
         for letter in word:
             new_states = set()
             for state in current_states:
-                for l, q in self._transitions[state]:
+                for l, q in self.transitions[state]:
                     if letter == l:
                         new_states.add(q)
             current_states = deepcopy(new_states)
-        return bool(self._accepting_states.intersection(current_states))
+        return bool(self.accepting_states.intersection(current_states))

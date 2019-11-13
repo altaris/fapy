@@ -42,7 +42,7 @@ class ReAST:
     def __init__(self, node_type: str, **kwargs):
         self.node_type = node_type
         if node_type == 'CONCAT':
-            self._init_left_right(**kwargs)
+            self.init_left_right(**kwargs)
         elif node_type == 'EPSILON':
             pass
         elif node_type == 'LETTER':
@@ -50,9 +50,9 @@ class ReAST:
                 raise ValueError(f'Node type {node_type} expects letter')
             self.letter = kwargs.get('letter')
         elif node_type == 'PLUS':
-            self._init_left_right(**kwargs)
+            self.init_left_right(**kwargs)
         elif node_type == 'STAR':
-            self._init_inner(**kwargs)
+            self.init_inner(**kwargs)
         else:
             raise ValueError(f'Unknown node type {node_type}')
 
@@ -69,14 +69,14 @@ class ReAST:
             return 'STAR(' + repr(self.inner) + ')'
         raise ValueError(f'Unknown node type {self.node_type}')
 
-    def _init_inner(self, **kwargs) -> None:
+    def init_inner(self, **kwargs) -> None:
         """Inits the node with an inner ast (for e.g. STAR)
         """
         if not kwargs.get('inner'):
             raise ValueError(f'Node type {self.node_type} expects inner ast')
         self.inner = kwargs.get('inner')
 
-    def _init_left_right(self, **kwargs) -> None:
+    def init_left_right(self, **kwargs) -> None:
         """Inits the node with a left and right ast (for e.g. CONCAT)
         """
         if not kwargs.get('left'):
