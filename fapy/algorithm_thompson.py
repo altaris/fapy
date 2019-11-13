@@ -3,9 +3,7 @@ Thompson's algorithm.
 """
 
 from fapy.common import (
-    Alphabet,
-    Letter,
-    State
+    Alphabet
 )
 from fapy.finite_automaton import (
     FiniteAutomaton
@@ -19,6 +17,9 @@ def thompson(
         regular_expression: RegularExpression,
         alphabet: Alphabet,
         index: int = 0) -> FiniteAutomaton:
+    """Transforms a regular expression into an equivalent automaton using
+    Thompson's algorithm.
+    """
 
     if regular_expression.node_type == 'CONCAT':
         if not regular_expression.left:
@@ -43,27 +44,27 @@ def thompson(
         )
 
     elif regular_expression.node_type == 'EPSILON':
-        q0 = f'q{index}'
-        q1 = f'q{index + 1}'
+        q_init = f'q{index}'
+        q_acc = f'q{index + 1}'
         return FiniteAutomaton(
             alphabet=alphabet,
-            states={q0, q1},
-            initial_states={q0},
-            accepting_states={q1},
-            transitions={q0: [('ε', q1)]}
+            states={q_init, q_acc},
+            initial_states={q_init},
+            accepting_states={q_acc},
+            transitions={q_init: [('ε', q_acc)]}
         )
 
     elif regular_expression.node_type == 'LETTER':
         if not regular_expression.letter:
             raise ValueError("This should not happen :/")
-        q0 = f'q{index}'
-        q1 = f'q{index + 1}'
+        q_init = f'q{index}'
+        q_acc = f'q{index + 1}'
         return FiniteAutomaton(
             alphabet=alphabet,
-            states={q0, q1},
-            initial_states={q0},
-            accepting_states={q1},
-            transitions={q0: [(regular_expression.letter, q1)]}
+            states={q_init, q_acc},
+            initial_states={q_init},
+            accepting_states={q_acc},
+            transitions={q_init: [(regular_expression.letter, q_acc)]}
         )
 
     elif regular_expression.node_type == 'PLUS':
