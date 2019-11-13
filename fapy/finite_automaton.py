@@ -45,7 +45,8 @@ class FiniteAutomaton:
             if state not in states:
                 raise ValueError(f'Unknown state "{state}" in transitions')
             for letter, next_state in transitions[state]:
-                if letter not in alphabet:
+                alphabet_plus_epsilon = list(alphabet) + ['ε']
+                if letter not in alphabet_plus_epsilon:
                     raise ValueError(
                         f'In transitions for state "{state}": '
                         f'unknown letter "{letter}"'
@@ -70,13 +71,27 @@ class FiniteAutomaton:
                 graph.edge('', str(state))
         for state in self.transitions:
             arrows = {}  # type: Dict[State, List[Letter]]
-            for letter, next_state in self.transitions[state]:
+            for letter, next_state in self.transitions.get(state, []):
                 arrows[next_state] = arrows.get(next_state, []) + [letter]
             for next_state in arrows:
                 arrows[next_state].sort()
                 label = ", ".join(arrows[next_state])
                 graph.edge(str(state), str(next_state), label=label)
         return graph
+
+    def epsilon_closure(self, states: Set[State]) -> Set[State]:
+        """Computes the epsilon closure of a set of states
+        """
+        states_closed = deepcopy(states)
+        unexplored_states = list(states)
+        while unexplored_states:
+            unexplored_state = unexplored_states.pop(0)
+            for letter, next_state in \
+                self.transitions.get(unexplored_state, []):
+                if letter == 'ε' and next_state not in states_closed:
+                    states_closed.add(next_state)
+                    unexplored_states.append(next_state)
+        return states_closed
 
     def is_deterministic(self) -> bool:
         """Returns whether the automaton is deterministic or not.
@@ -91,6 +106,8 @@ class FiniteAutomaton:
             letters = [letter for letter, _ in self.transitions[state]]
             if len(letters) != len(set(letters)):
                 return False
+            if 'ε' in letters:
+                return False
         return True
 
     def read(self, word: Word) -> bool:
@@ -98,12 +115,12 @@ class FiniteAutomaton:
         """
         if not set(word).issubset(self.alphabet):
             raise ValueError(f'Invalid word {word}')
-        current_states = deepcopy(self.initial_states)
+        current_states = self.epsilon_closure(self.initial_states)
         for letter in word:
             new_states = set()
             for state in current_states:
-                for l, q in self.transitions[state]:
+                for l, q in self.transitions.get(state, []):
                     if letter == l:
                         new_states.add(q)
-            current_states = deepcopy(new_states)
+            current_states = self.epsilon_closure(new_states)
         return bool(self.accepting_states.intersection(current_states))
