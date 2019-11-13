@@ -121,8 +121,6 @@ class FiniteAutomaton:
         """
         if isinstance(word, str):
             word = list(word)
-        if not set(word).issubset(self.alphabet):
-            raise ValueError(f'Invalid word {word}')
         current_states = self.epsilon_closure(self.initial_states)
         for letter in word:
             new_states = set()

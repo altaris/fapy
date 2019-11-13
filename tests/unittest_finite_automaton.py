@@ -185,8 +185,6 @@ class FiniteAutomatonTest(unittest.TestCase):
             }
         )
 
-        with self.assertRaises(ValueError):
-            ndfa.read(['a', 'INVALID'])
         self.assertTrue(ndfa.read('a'))
         self.assertTrue(ndfa.read('aa'))
         self.assertTrue(ndfa.read('aba'))
