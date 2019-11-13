@@ -8,7 +8,8 @@ from typing import (
     Dict,
     List,
     Set,
-    Tuple
+    Tuple,
+    Union
 )
 
 from graphviz import (
@@ -115,9 +116,11 @@ class FiniteAutomaton:
                 return False
         return True
 
-    def read(self, word: Word) -> bool:
+    def read(self, word: Union[str, Word]) -> bool:
         """Reads a word and returns whether the automaton accepts it or not.
         """
+        if isinstance(word, str):
+            word = list(word)
         if not set(word).issubset(self.alphabet):
             raise ValueError(f'Invalid word {word}')
         current_states = self.epsilon_closure(self.initial_states)

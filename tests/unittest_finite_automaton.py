@@ -184,20 +184,23 @@ class FiniteAutomatonTest(unittest.TestCase):
                 'q1': [('ε', 'q2')]
             }
         )
+
         with self.assertRaises(ValueError):
             ndfa.read(['a', 'INVALID'])
-        self.assertTrue(ndfa.read(['a']))
-        self.assertTrue(ndfa.read(['a', 'a']))
-        self.assertTrue(ndfa.read(['a', 'b', 'a']))
-        self.assertTrue(ndfa.read(['a', 'b', 'b']))
-        self.assertFalse(ndfa.read([]))
-        self.assertFalse(ndfa.read(['b']))
-        self.assertFalse(ndfa.read(['b', 'b']))
-        self.assertFalse(ndfa.read(['b', 'b', 'b']))
-        self.assertTrue(ndfae.read(['a']))
-        self.assertTrue(ndfae.read(['a', 'a']))
-        self.assertTrue(ndfae.read(['a', 'a', 'a']))
-        self.assertTrue(ndfae.read(['a', 'b', 'a']))
-        self.assertTrue(ndfae.read(['b', 'b', 'a']))
-        self.assertFalse(ndfae.read(['b']))
-        self.assertTrue(ndfae2.read([]))
+        self.assertTrue(ndfa.read('a'))
+        self.assertTrue(ndfa.read('aa'))
+        self.assertTrue(ndfa.read('aba'))
+        self.assertTrue(ndfa.read('abb'))
+        self.assertFalse(ndfa.read(''))
+        self.assertFalse(ndfa.read('b'))
+        self.assertFalse(ndfa.read('bb'))
+        self.assertFalse(ndfa.read('bbb'))
+
+        self.assertTrue(ndfae.read('a'))
+        self.assertTrue(ndfae.read('aa'))
+        self.assertTrue(ndfae.read('aaa'))
+        self.assertTrue(ndfae.read('aba'))
+        self.assertTrue(ndfae.read('bba'))
+
+        self.assertFalse(ndfae.read('b'))
+        self.assertTrue(ndfae2.read(''))
