@@ -6,6 +6,7 @@ import unittest
 
 sys.path.insert(0, "../")
 
+# pylint: disable wrong-import-position
 from fapy.finite_automaton import (
     FiniteAutomaton
 )
