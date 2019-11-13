@@ -15,10 +15,7 @@ from graphviz import (
     Digraph
 )
 
-Letter = str
-Alphabet = Set[Letter]  # pylint: disable=invalid-name
-State = str
-Word = List[Letter]
+from fapy.common import *
 
 
 class FiniteAutomaton:
