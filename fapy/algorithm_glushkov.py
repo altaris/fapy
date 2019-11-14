@@ -64,70 +64,6 @@ def _linearize_regular_expression(
     raise ValueError(f'Unknown node type {regular_expression.node_type}')
 
 
-def _accepting_letters(regular_expression: RegularExpression) -> Set[Letter]:
-    if regular_expression.node_type == 'CONCAT':
-        if regular_expression.right.accepts_epsilon():
-            return _accepting_letters(regular_expression.left) | \
-                _accepting_letters(regular_expression.right)
-        return _accepting_letters(regular_expression.right)
-    if regular_expression.node_type == 'EPSILON':
-        return set()
-    if regular_expression.node_type == 'LETTER':
-        return {regular_expression.letter}
-    if regular_expression.node_type == 'PLUS':
-        return _accepting_letters(regular_expression.left) | \
-            _accepting_letters(regular_expression.right)
-    if regular_expression.node_type == 'STAR':
-        return _accepting_letters(regular_expression.inner)
-    raise ValueError(f'Unknown node type {regular_expression.node_type}')
-
-
-def _initial_letters(regular_expression: RegularExpression) -> Set[Letter]:
-    if regular_expression.node_type == 'CONCAT':
-        if regular_expression.left.accepts_epsilon():
-            return _initial_letters(regular_expression.left) | \
-                _initial_letters(regular_expression.right)
-        return _initial_letters(regular_expression.left)
-    if regular_expression.node_type == 'EPSILON':
-        return set()
-    if regular_expression.node_type == 'LETTER':
-        return {regular_expression.letter}
-    if regular_expression.node_type == 'PLUS':
-        return _initial_letters(regular_expression.left) | \
-            _initial_letters(regular_expression.right)
-    if regular_expression.node_type == 'STAR':
-        return _initial_letters(regular_expression.inner)
-    raise ValueError(f'Unknown node type {regular_expression.node_type}')
-
-
-def _successors(
-        regular_expression: RegularExpression,
-        letter: Letter) -> Set[Letter]:
-    """From a regular expression, returns all potential successors of a
-    given letter.
-    """
-    if regular_expression.node_type == 'CONCAT':
-        if letter in _accepting_letters(regular_expression.left):
-            return _successors(regular_expression.left, letter) | \
-                _successors(regular_expression.right, letter) | \
-                _initial_letters(regular_expression.right)
-        return _successors(regular_expression.left, letter) | \
-            _successors(regular_expression.right, letter)
-    if regular_expression.node_type == 'EPSILON':
-        return set()
-    if regular_expression.node_type == 'LETTER':
-        return set()
-    if regular_expression.node_type == 'PLUS':
-        return _successors(regular_expression.left, letter) | \
-            _successors(regular_expression.right, letter)
-    if regular_expression.node_type == 'STAR':
-        if letter in _accepting_letters(regular_expression.inner):
-            return _successors(regular_expression.inner, letter) | \
-                _initial_letters(regular_expression.inner)
-        return _successors(regular_expression.inner, letter)
-    raise ValueError(f'Unknown node type {regular_expression.node_type}')
-
-
 def glushkov(regular_expression: RegularExpression) -> FiniteAutomaton:
 
     linearized, _ = _linearize_regular_expression(regular_expression)
@@ -136,20 +72,20 @@ def glushkov(regular_expression: RegularExpression) -> FiniteAutomaton:
         alphabet=regular_expression.alphabet(),
         states=linearized.alphabet() | {q_init_result},
         initial_states={q_init_result},
-        accepting_states=_accepting_letters(linearized),
+        accepting_states=linearized.accepting_letters(),
         transitions={
             q_init_result: []
         }
     )
 
-    for letter in _initial_letters(linearized):
+    for letter in linearized.initial_letters():
         real_letter = letter[0]
         result.transitions[q_init_result].append((real_letter, letter))
 
     for letter in linearized.alphabet():
         if letter not in result.transitions:
             result.transitions[letter] = []
-        for successor in _successors(linearized, letter):
+        for successor in linearized.successors(letter):
             real_letter = successor[0]
             result.transitions[letter].append((real_letter, successor))
 

@@ -5,10 +5,7 @@ import unittest
 
 # pylint: disable wrong-import-position
 from fapy.algorithm_glushkov import (
-    _accepting_letters,
-    _initial_letters,
     _linearize_regular_expression,
-    _successors,
     glushkov
 )
 from fapy.regular_expression import (
@@ -16,74 +13,6 @@ from fapy.regular_expression import (
 )
 
 class GlushkovTest(unittest.TestCase):
-
-    def test__accepting_letters(self):
-        self.assertEqual(
-            _accepting_letters(parse_regular_expression("ε")),
-            set()
-        )
-        self.assertEqual(
-            _accepting_letters(parse_regular_expression("a")),
-            {'a'}
-        )
-        self.assertEqual(
-            _accepting_letters(parse_regular_expression("a b")),
-            {'b'}
-        )
-        self.assertEqual(
-            _accepting_letters(parse_regular_expression("a + b")),
-            {'a', 'b'}
-        )
-        self.assertEqual(
-            _accepting_letters(parse_regular_expression("a* b")),
-            {'b'}
-        )
-        self.assertEqual(
-            _accepting_letters(parse_regular_expression("a b*")),
-            {'a', 'b'}
-        )
-        self.assertEqual(
-            _accepting_letters(parse_regular_expression("(a + b)* (c + ε)")),
-            {'a', 'b', 'c'}
-        )
-        self.assertEqual(
-            _accepting_letters(parse_regular_expression("(c + ε) (a + b)*")),
-            {'a', 'b', 'c'}
-        )
-
-    def test__initial_letters(self):
-        self.assertEqual(
-            _initial_letters(parse_regular_expression("ε")),
-            set()
-        )
-        self.assertEqual(
-            _initial_letters(parse_regular_expression("a")),
-            {'a'}
-        )
-        self.assertEqual(
-            _initial_letters(parse_regular_expression("a b")),
-            {'a'}
-        )
-        self.assertEqual(
-            _initial_letters(parse_regular_expression("a + b")),
-            {'a', 'b'}
-        )
-        self.assertEqual(
-            _initial_letters(parse_regular_expression("a* b")),
-            {'a', 'b'}
-        )
-        self.assertEqual(
-            _initial_letters(parse_regular_expression("a b*")),
-            {'a'}
-        )
-        self.assertEqual(
-            _initial_letters(parse_regular_expression("(a + b)* (c + ε)")),
-            {'a', 'b', 'c'}
-        )
-        self.assertEqual(
-            _initial_letters(parse_regular_expression("(c + ε) (a + b)*")),
-            {'a', 'b', 'c'}
-        )
 
     def test__linearize_regular_expression(self):
         re1 = parse_regular_expression('a (a + b + ε)* a')
@@ -99,34 +28,6 @@ class GlushkovTest(unittest.TestCase):
         lin2, idx2 = _linearize_regular_expression(re2)
         self.assertEqual(idx2, 7)
         self.assertEqual(len(lin2.alphabet()), 7)
-
-    def test__successors(self):
-        re1 = parse_regular_expression('a b')
-        self.assertEqual(_successors(re1, 'a'), {'b'})
-        self.assertEqual(_successors(re1, 'b'), set())
-        self.assertEqual(_successors(re1, 'c'), set())
-        re2 = parse_regular_expression('(a + b)*')
-        self.assertEqual(_successors(re2, 'a'), {'a', 'b'})
-        self.assertEqual(_successors(re2, 'b'), {'a', 'b'})
-        self.assertEqual(_successors(re2, 'c'), set())
-        re3 = parse_regular_expression('a b a c')
-        self.assertEqual(_successors(re3, 'a'), {'b', 'c'})
-        self.assertEqual(_successors(re3, 'b'), {'a'})
-        self.assertEqual(_successors(re3, 'c'), set())
-        re4 = parse_regular_expression('(a b)* (c + ε) d')
-        self.assertEqual(_successors(re4, 'a'), {'b'})
-        self.assertEqual(_successors(re4, 'b'), {'a', 'c', 'd'})
-        self.assertEqual(_successors(re4, 'c'), {'d'})
-        self.assertEqual(_successors(re4, 'd'), set())
-        re5 = parse_regular_expression('(a+ε)(b+ε)(c+ε)(d+ε)')
-        self.assertEqual(_successors(re5, 'a'), {'b', 'c', 'd'})
-        self.assertEqual(_successors(re5, 'b'), {'c', 'd'})
-        self.assertEqual(_successors(re5, 'c'), {'d'})
-        self.assertEqual(_successors(re5, 'd'), set())
-        re6 = parse_regular_expression('(a (bc)*)*')
-        self.assertEqual(_successors(re6, 'a'), {'a', 'b'})
-        self.assertEqual(_successors(re6, 'b'), {'c'})
-        self.assertEqual(_successors(re6, 'c'), {'a', 'b'})
 
     def test_glushkov(self):
         aut1 = glushkov(parse_regular_expression('a b'))

@@ -12,6 +12,40 @@ from fapy.regular_expression import (
 
 class RegularExpressionTest(unittest.TestCase):
 
+    def test_accepting_letters(self):
+        self.assertEqual(
+            parse_regular_expression("ε").accepting_letters(),
+            set()
+        )
+        self.assertEqual(
+            parse_regular_expression("a").accepting_letters(),
+            {'a'}
+        )
+        self.assertEqual(
+            parse_regular_expression("a b").accepting_letters(),
+            {'b'}
+        )
+        self.assertEqual(
+            parse_regular_expression("a + b").accepting_letters(),
+            {'a', 'b'}
+        )
+        self.assertEqual(
+            parse_regular_expression("a* b").accepting_letters(),
+            {'b'}
+        )
+        self.assertEqual(
+            parse_regular_expression("a b*").accepting_letters(),
+            {'a', 'b'}
+        )
+        self.assertEqual(
+            parse_regular_expression("(a + b)* (c + ε)").accepting_letters(),
+            {'a', 'b', 'c'}
+        )
+        self.assertEqual(
+            parse_regular_expression("(c + ε) (a + b)*").accepting_letters(),
+            {'a', 'b', 'c'}
+        )
+
     def test_accepts_epsilon(self):
         self.assertTrue(parse_regular_expression('ε').accepts_epsilon())
         self.assertTrue(parse_regular_expression('a*').accepts_epsilon())
@@ -28,6 +62,69 @@ class RegularExpressionTest(unittest.TestCase):
                          {'a', 'b'})
         self.assertEqual(parse_regular_expression('a').alphabet(), {'a'})
         self.assertEqual(parse_regular_expression('a* b').alphabet(), {'a', 'b'})
+
+    def test_initial_letters(self):
+        self.assertEqual(
+            parse_regular_expression("ε").initial_letters(),
+            set()
+        )
+        self.assertEqual(
+            parse_regular_expression("a").initial_letters(),
+            {'a'}
+        )
+        self.assertEqual(
+            parse_regular_expression("a b").initial_letters(),
+            {'a'}
+        )
+        self.assertEqual(
+            parse_regular_expression("a + b").initial_letters(),
+            {'a', 'b'}
+        )
+        self.assertEqual(
+            parse_regular_expression("a* b").initial_letters(),
+            {'a', 'b'}
+        )
+        self.assertEqual(
+            parse_regular_expression("a b*").initial_letters(),
+            {'a'}
+        )
+        self.assertEqual(
+            parse_regular_expression("(a + b)* (c + ε)").initial_letters(),
+            {'a', 'b', 'c'}
+        )
+        self.assertEqual(
+            parse_regular_expression("(c + ε) (a + b)*").initial_letters(),
+            {'a', 'b', 'c'}
+        )
+
+    def test_successors(self):
+        re1 = parse_regular_expression('a b')
+        self.assertEqual(re1.successors('a'), {'b'})
+        self.assertEqual(re1.successors('b'), set())
+        self.assertEqual(re1.successors('c'), set())
+        re2 = parse_regular_expression('(a + b)*')
+        self.assertEqual(re2.successors('a'), {'a', 'b'})
+        self.assertEqual(re2.successors('b'), {'a', 'b'})
+        self.assertEqual(re2.successors('c'), set())
+        re3 = parse_regular_expression('a b a c')
+        self.assertEqual(re3.successors('a'), {'b', 'c'})
+        self.assertEqual(re3.successors('b'), {'a'})
+        self.assertEqual(re3.successors('c'), set())
+        re4 = parse_regular_expression('(a b)* (c + ε) d')
+        self.assertEqual(re4.successors('a'), {'b'})
+        self.assertEqual(re4.successors('b'), {'a', 'c', 'd'})
+        self.assertEqual(re4.successors('c'), {'d'})
+        self.assertEqual(re4.successors('d'), set())
+        re5 = parse_regular_expression('(a+ε)(b+ε)(c+ε)(d+ε)')
+        self.assertEqual(re5.successors('a'), {'b', 'c', 'd'})
+        self.assertEqual(re5.successors('b'), {'c', 'd'})
+        self.assertEqual(re5.successors('c'), {'d'})
+        self.assertEqual(re5.successors('d'), set())
+        re6 = parse_regular_expression('(a (bc)*)*')
+        self.assertEqual(re6.successors('a'), {'a', 'b'})
+        self.assertEqual(re6.successors('b'), {'c'})
+        self.assertEqual(re6.successors('c'), {'a', 'b'})
+
 
 
 class ReParserTest(unittest.TestCase):

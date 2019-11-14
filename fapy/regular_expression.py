@@ -2,7 +2,8 @@
 """
 
 from typing import (
-    Optional
+    Optional,
+    Set
 )
 
 
@@ -87,6 +88,23 @@ class RegularExpression:
         self._left = kwargs.get('left')
         self._right = kwargs.get('right')
 
+    def accepting_letters(self) -> Set[Letter]:
+        if self.node_type == 'CONCAT':
+            if self.right.accepts_epsilon():
+                return self.left.accepting_letters() | \
+                    self.right.accepting_letters()
+            return self.right.accepting_letters()
+        if self.node_type == 'EPSILON':
+            return set()
+        if self.node_type == 'LETTER':
+            return {self.letter}
+        if self.node_type == 'PLUS':
+            return self.left.accepting_letters() | \
+                self.right.accepting_letters()
+        if self.node_type == 'STAR':
+            return self.inner.accepting_letters()
+        raise ValueError(f'Unknown node type {self.node_type}')
+
     def accepts_epsilon(self) -> bool:
         """Returns whether the regular expression accepts the empty word"""
         if self.node_type == 'CONCAT':
@@ -114,6 +132,23 @@ class RegularExpression:
             return self.inner.alphabet()
         raise ValueError(f'Unknown node type {self.node_type}')
 
+    def initial_letters(self) -> Set[Letter]:
+        if self.node_type == 'CONCAT':
+            if self.left.accepts_epsilon():
+                return self.left.initial_letters() | \
+                    self.right.initial_letters()
+            return self.left.initial_letters()
+        if self.node_type == 'EPSILON':
+            return set()
+        if self.node_type == 'LETTER':
+            return {self.letter}
+        if self.node_type == 'PLUS':
+            return self.left.initial_letters() | \
+                self.right.initial_letters()
+        if self.node_type == 'STAR':
+            return self.inner.initial_letters()
+        raise ValueError(f'Unknown node type {self.node_type}')
+
     @property
     def left(self) -> 'RegularExpression':
         """Asserts that left is not None, and returns it
@@ -129,6 +164,29 @@ class RegularExpression:
         if not self._letter:
             raise ValueError('Value of member "letter" is None')
         return self._letter
+
+    def successors(self, letter: Letter) -> Set[Letter]:
+        """From a regular expression, returns all potential successors of a
+        given letter.
+        """
+        if self.node_type == 'CONCAT':
+            if letter in self.left.accepting_letters():
+                return self.left.successors(letter) | \
+                    self.right.successors(letter) | \
+                    self.right.initial_letters()
+            return self.left.successors(letter) | self.right.successors(letter)
+        if self.node_type == 'EPSILON':
+            return set()
+        if self.node_type == 'LETTER':
+            return set()
+        if self.node_type == 'PLUS':
+            return self.left.successors(letter) | self.right.successors(letter)
+        if self.node_type == 'STAR':
+            if letter in self.inner.accepting_letters():
+                return self.inner.successors(letter) | \
+                    self.inner.initial_letters()
+            return self.inner.successors(letter)
+        raise ValueError(f'Unknown node type {self.node_type}')
 
     @property
     def right(self) -> 'RegularExpression':
