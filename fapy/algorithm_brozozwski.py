@@ -40,11 +40,9 @@ def brozozwski(automaton: FiniteAutomaton) -> RegularExpression:
         table[state][q_acc] = 'ε'
 
     states_to_remove = list(automaton.states)
-    # print("------------")
-    # print(table)
+    states_to_remove.sort()
     while states_to_remove:
         qi = states_to_remove.pop()
-        # print("removing " + qi)
         for qk in states_to_remove + [q_init, q_acc]:
             if qk == qi:
                 continue
@@ -66,6 +64,5 @@ def brozozwski(automaton: FiniteAutomaton) -> RegularExpression:
                     table[qk][ql] = e_kil
                 else:
                     table[qk][ql] = e_kl
-        # print(table)
 
     return parse_regular_expression(table[q_init].get(q_acc, ''))
