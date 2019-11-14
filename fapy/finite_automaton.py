@@ -28,6 +28,42 @@ class FiniteAutomaton:
     """Finite automaton
     """
 
+    def __add__(self, other) -> 'FiniteAutomaton':
+        """Returns the disjoint union of two automata
+        """
+        if not isinstance(other, FiniteAutomaton):
+            raise NotImplementedError
+        return FiniteAutomaton(
+            alphabet=self.alphabet | other.alphabet,
+            states=self.states | other.states,
+            initial_states=self.initial_states | other.initial_states,
+            accepting_states=self.accepting_states | other.accepting_states,
+            transitions={**self.transitions, **other.transitions}
+        )
+
+    def __mul__(self, other) -> 'FiniteAutomaton':
+        """Concatenates two automata
+        """
+        if not isinstance(other, FiniteAutomaton):
+            raise NotImplementedError
+        result = FiniteAutomaton(
+            alphabet=self.alphabet | other.alphabet,
+            states=self.states | other.states,
+            initial_states=self.initial_states,
+            accepting_states=other.accepting_states,
+            transitions={
+                **self.transitions,
+                **other.transitions
+            }
+        )
+        for q_acc_left in self.accepting_states:
+            if q_acc_left not in result.transitions:
+                result.transitions[q_acc_left] = []
+            for q_init_right in other.initial_states:
+                result.transitions[q_acc_left].append(('ε', q_init_right))
+        return result
+
+
     # pylint: disable=too-many-arguments
     def __init__(
             self,
@@ -130,3 +166,33 @@ class FiniteAutomaton:
                         new_states.add(next_state)
             current_states = self.epsilon_closure(new_states)
         return bool(self.accepting_states.intersection(current_states))
+
+
+def empty_word_automaton(state: State = 'q0') -> FiniteAutomaton:
+    """Returns the automaton with a unique state that is both initial and
+    accepting.
+    """
+    return FiniteAutomaton(
+        alphabet=set(),
+        states={state},
+        initial_states={state},
+        accepting_states={state},
+        transitions=dict()
+    )
+
+
+def letter_automaton(
+        letter: Letter,
+        initial_state: State = 'q0',
+        accepting_state: State = 'q1') -> FiniteAutomaton:
+    """Returns a 2 states automaton that only accepts the given letter.
+
+    The letter may be ε.
+    """
+    return FiniteAutomaton(
+        alphabet={letter},
+        states={initial_state, accepting_state},
+        initial_states={initial_state},
+        accepting_states={accepting_state},
+        transitions={initial_state: [(letter, accepting_state)]}
+    )

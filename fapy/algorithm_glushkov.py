@@ -7,14 +7,11 @@ from typing import (
 )
 
 
-from fapy.algorithm_thompson import (
-    _concatenation_automaton,
-    _empty_word_automaton
-)
 from fapy.common import (
     Letter
 )
 from fapy.finite_automaton import (
+    empty_word_automaton,
     FiniteAutomaton
 )
 from fapy.regular_expression import (
