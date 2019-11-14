@@ -35,25 +35,25 @@ class RegularExpression:
     )
 
     node_type: str
-    left = None  # type: Optional[RegularExpression]
-    letter = None  # type: Optional[Letter]
-    right = None  # type: Optional[RegularExpression]
-    inner = None  # type: Optional[RegularExpression]
+    _left = None  # type: Optional[RegularExpression]
+    _letter = None  # type: Optional[Letter]
+    _right = None  # type: Optional[RegularExpression]
+    _inner = None  # type: Optional[RegularExpression]
 
     def __init__(self, node_type: str, **kwargs):
         self.node_type = node_type
         if node_type == 'CONCAT':
-            self.init_left_right(**kwargs)
+            self._init_left_right(**kwargs)
         elif node_type == 'EPSILON':
             pass
         elif node_type == 'LETTER':
             if not kwargs.get('letter'):
                 raise ValueError(f'Node type {node_type} expects letter')
-            self.letter = kwargs.get('letter')
+            self._letter = kwargs.get('letter')
         elif node_type == 'PLUS':
-            self.init_left_right(**kwargs)
+            self._init_left_right(**kwargs)
         elif node_type == 'STAR':
-            self.init_inner(**kwargs)
+            self._init_inner(**kwargs)
         else:
             raise ValueError(f'Unknown node type {node_type}')
 
@@ -70,23 +70,32 @@ class RegularExpression:
             return 'STAR(' + repr(self.inner) + ')'
         raise ValueError(f'Unknown node type {self.node_type}')
 
+    def _init_inner(self, **kwargs) -> None:
+        """Inits the node with an inner ast (for e.g. STAR)
+        """
+        if not kwargs.get('inner'):
+            raise ValueError(f'Node type {self.node_type} expects inner ast')
+        self._inner = kwargs.get('inner')
+
+    def _init_left_right(self, **kwargs) -> None:
+        """Inits the node with a left and right ast (for e.g. CONCAT)
+        """
+        if not kwargs.get('left'):
+            raise ValueError(f'Node type {self.node_type} expects left ast')
+        if not kwargs.get('right'):
+            raise ValueError(f'Node type {self.node_type} expects left ast')
+        self._left = kwargs.get('left')
+        self._right = kwargs.get('right')
+
     def accepts_epsilon(self) -> bool:
         """Returns whether the regular expression accepts the empty word"""
         if self.node_type == 'CONCAT':
-            if not self.left:
-                raise ValueError("This should not happen :/")
-            if not self.right:
-                raise ValueError("This should not happen :/")
             return self.left.accepts_epsilon() and self.right.accepts_epsilon()
         if self.node_type == 'EPSILON':
             return True
         if self.node_type == 'LETTER':
             return False
         if self.node_type == 'PLUS':
-            if not self.left:
-                raise ValueError("This should not happen :/")
-            if not self.right:
-                raise ValueError("This should not happen :/")
             return self.left.accepts_epsilon() or self.right.accepts_epsilon()
         if self.node_type == 'STAR':
             return True
@@ -96,40 +105,46 @@ class RegularExpression:
         """Returns the alphabet of the regular expression
         """
         if self.node_type in ['CONCAT', 'PLUS']:
-            if not self.left:
-                raise ValueError("This should not happen :/")
-            if not self.right:
-                raise ValueError("This should not happen :/")
             return self.left.alphabet() | self.right.alphabet()
         if self.node_type == 'EPSILON':
             return set()
         if self.node_type == 'LETTER':
-            if not self.letter:
-                raise ValueError("This should not happen :/")
             return {self.letter}
         if self.node_type == 'STAR':
-            if not self.inner:
-                raise ValueError("This should not happen :/")
             return self.inner.alphabet()
         raise ValueError(f'Unknown node type {self.node_type}')
 
-    def init_inner(self, **kwargs) -> None:
-        """Inits the node with an inner ast (for e.g. STAR)
+    @property
+    def left(self) -> 'RegularExpression':
+        """Asserts that left is not None, and returns it
         """
-        if not kwargs.get('inner'):
-            raise ValueError(f'Node type {self.node_type} expects inner ast')
-        self.inner = kwargs.get('inner')
+        if not self._left:
+            raise ValueError('Value of member "left" is None')
+        return self._left
 
-    def init_left_right(self, **kwargs) -> None:
-        """Inits the node with a left and right ast (for e.g. CONCAT)
+    @property
+    def letter(self) -> Letter:
+        """Asserts that letter is not None, and returns it
         """
-        if not kwargs.get('left'):
-            raise ValueError(f'Node type {self.node_type} expects left ast')
-        if not kwargs.get('right'):
-            raise ValueError(f'Node type {self.node_type} expects left ast')
-        self.left = kwargs.get('left')
-        self.right = kwargs.get('right')
+        if not self._letter:
+            raise ValueError('Value of member "letter" is None')
+        return self._letter
 
+    @property
+    def right(self) -> 'RegularExpression':
+        """Asserts that right is not None, and returns it
+        """
+        if not self._right:
+            raise ValueError('Value of member "right" is None')
+        return self._right
+
+    @property
+    def inner(self) -> 'RegularExpression':
+        """Asserts that inner is not None, and returns it
+        """
+        if not self._inner:
+            raise ValueError('Value of member "inner" is None')
+        return self._inner
 
 
 class ReLexer(Lexer):
