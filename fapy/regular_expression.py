@@ -71,6 +71,19 @@ class RegularExpression:
             return 'STAR(' + repr(self.inner) + ')'
         raise ValueError(f'Unknown node type {self.node_type}')
 
+    def __str__(self) -> str:
+        if self.node_type == 'CONCAT':
+            return str(self.left) + ' ' + str(self.right)
+        if self.node_type == 'EPSILON':
+            return 'ε'
+        if self.node_type == 'LETTER':
+            return str(self.letter)
+        if self.node_type == 'PLUS':
+            return str(self.left) + ' + ' + str(self.right)
+        if self.node_type == 'STAR':
+            return '(' + str(self.inner) + ')*'
+        raise ValueError(f'Unknown node type {self.node_type}')
+
     def _init_inner(self, **kwargs) -> None:
         """Inits the node with an inner ast (for e.g. STAR)
         """
