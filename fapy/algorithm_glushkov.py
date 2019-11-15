@@ -61,7 +61,7 @@ def _linearize_regular_expression(
             index
         )
         return (RegularExpression('STAR', inner=inner), index)
-    raise ValueError(f'Unknown node type {regular_expression.node_type}')
+    raise NotImplementedError(f'Unknown node type {regular_expression.node_type}')
 
 
 def glushkov(regular_expression: RegularExpression) -> FiniteAutomaton:

@@ -1,12 +1,14 @@
-RUN 		= python3
-TYPECHECK	= mypy
-
 all: typecheck unittest
+
+.PHONY: coverage
+coverage: unittest
+	coverage html
+	xdg-open out/coverage/index.html
 
 .PHONY: typecheck
 typecheck:
-	$(TYPECHECK) fapy/*.py
+	mypy fapy/*.py
 
 .PHONY: unittest
 unittest:
-	@$(RUN) -m unittest discover --start-directory tests --pattern "unittest_*.py" --verbose
+	coverage run -m unittest discover --start-directory tests --pattern "unittest_*.py" --verbose

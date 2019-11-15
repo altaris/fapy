@@ -34,7 +34,7 @@ def thompson(
         return thompson_plus(regular_expression, alphabet, index)
     if regular_expression.node_type == 'STAR':
         return thompson_star(regular_expression, alphabet, index)
-    raise ValueError(f'Unknown node type {regular_expression.node_type}')
+    raise NotImplementedError(f'Unknown node type {regular_expression.node_type}')
 
 
 def thompson_concat(
@@ -43,10 +43,6 @@ def thompson_concat(
         index: int = 0) -> FiniteAutomaton:
     """Thompson's algorithm, CONCAT case
     """
-    if not regular_expression.left:
-        raise ValueError("This should not happen :/")
-    if not regular_expression.right:
-        raise ValueError("This should not happen :/")
     left = thompson(regular_expression.left, alphabet, index)
     index += len(left.states)
     right = thompson(regular_expression.right, alphabet, index)
@@ -64,8 +60,6 @@ def thompson_letter(
         index: int = 0) -> FiniteAutomaton:
     """Thompson's algorithm, LETTER case
     """
-    if not regular_expression.letter:
-        raise ValueError("This should not happen :/")
     return letter_automaton(
         regular_expression.letter,
         f'q{index}',
@@ -79,10 +73,6 @@ def thompson_plus(
         index: int = 0) -> FiniteAutomaton:
     """Thompson's algorithm, PLUS case
     """
-    if not regular_expression.left:
-        raise ValueError("This should not happen :/")
-    if not regular_expression.right:
-        raise ValueError("This should not happen :/")
     left = thompson(regular_expression.left, alphabet, index)
     index += len(left.states)
     right = thompson(regular_expression.right, alphabet, index)
@@ -97,8 +87,6 @@ def thompson_star(
         index: int = 0) -> FiniteAutomaton:
     """Thompson's algorithm, STAR case
     """
-    if not regular_expression.inner:
-        raise ValueError("This should not happen :/")
     inner = thompson(regular_expression.inner, alphabet, index)
     index += len(inner.states)
     q_init_inner = list(inner.initial_states)[0]

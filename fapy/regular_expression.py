@@ -56,7 +56,7 @@ class RegularExpression:
         elif node_type == 'STAR':
             self._init_inner(**kwargs)
         else:
-            raise ValueError(f'Unknown node type {node_type}')
+            raise NotImplementedError(f'Unknown node type {node_type}')
 
     def __repr__(self) -> str:
         if self.node_type == 'CONCAT':
@@ -69,7 +69,7 @@ class RegularExpression:
             return 'PLUS(' + repr(self.left) + ', ' + repr(self.right) + ')'
         if self.node_type == 'STAR':
             return 'STAR(' + repr(self.inner) + ')'
-        raise ValueError(f'Unknown node type {self.node_type}')
+        raise NotImplementedError(f'Unknown node type {self.node_type}')
 
     def __str__(self) -> str:
         if self.node_type == 'CONCAT':
@@ -82,7 +82,7 @@ class RegularExpression:
             return str(self.left) + ' + ' + str(self.right)
         if self.node_type == 'STAR':
             return '(' + str(self.inner) + ')*'
-        raise ValueError(f'Unknown node type {self.node_type}')
+        raise NotImplementedError(f'Unknown node type {self.node_type}')
 
     def _init_inner(self, **kwargs) -> None:
         """Inits the node with an inner ast (for e.g. STAR)
@@ -116,7 +116,7 @@ class RegularExpression:
                 self.right.accepting_letters()
         if self.node_type == 'STAR':
             return self.inner.accepting_letters()
-        raise ValueError(f'Unknown node type {self.node_type}')
+        raise NotImplementedError(f'Unknown node type {self.node_type}')
 
     def accepts_epsilon(self) -> bool:
         """Returns whether the regular expression accepts the empty word"""
@@ -130,7 +130,7 @@ class RegularExpression:
             return self.left.accepts_epsilon() or self.right.accepts_epsilon()
         if self.node_type == 'STAR':
             return True
-        raise ValueError(f'Unknown node type {self.node_type}')
+        raise NotImplementedError(f'Unknown node type {self.node_type}')
 
     def alphabet(self) -> Alphabet:
         """Returns the alphabet of the regular expression
@@ -143,7 +143,7 @@ class RegularExpression:
             return {self.letter}
         if self.node_type == 'STAR':
             return self.inner.alphabet()
-        raise ValueError(f'Unknown node type {self.node_type}')
+        raise NotImplementedError(f'Unknown node type {self.node_type}')
 
     def initial_letters(self) -> Set[Letter]:
         if self.node_type == 'CONCAT':
@@ -160,7 +160,7 @@ class RegularExpression:
                 self.right.initial_letters()
         if self.node_type == 'STAR':
             return self.inner.initial_letters()
-        raise ValueError(f'Unknown node type {self.node_type}')
+        raise NotImplementedError(f'Unknown node type {self.node_type}')
 
     @property
     def left(self) -> 'RegularExpression':
@@ -199,7 +199,7 @@ class RegularExpression:
                 return self.inner.successors(letter) | \
                     self.inner.initial_letters()
             return self.inner.successors(letter)
-        raise ValueError(f'Unknown node type {self.node_type}')
+        raise NotImplementedError(f'Unknown node type {self.node_type}')
 
     @property
     def right(self) -> 'RegularExpression':

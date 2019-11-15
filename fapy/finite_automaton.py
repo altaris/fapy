@@ -85,7 +85,7 @@ class FiniteAutomaton:
             raise ValueError('accepting_states ⊈ states')
         for state in transitions:
             if state not in states:
-                raise ValueError(f'Unknown state "{state}" in transitions')
+                raise NotImplementedError(f'Unknown state "{state}" in transitions')
             for letter, next_state in transitions[state]:
                 alphabet_plus_epsilon = list(alphabet) + ['ε']
                 if letter not in alphabet_plus_epsilon:
