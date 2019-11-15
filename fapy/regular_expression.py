@@ -1,6 +1,9 @@
 """Regular expressions
 """
 
+from copy import (
+    deepcopy
+)
 from typing import (
     Optional,
     Set
@@ -45,6 +48,25 @@ class RegularExpression:
         self.node_type = node_type
         if node_type == 'CONCAT':
             self._init_left_right(**kwargs)
+            if self.left.node_type == 'EPSILON' and \
+                self.right.node_type == 'EPSILON':
+                self.node_type = 'EPSILON'
+                self._left = None
+                self._right = None
+            elif self.left.node_type == 'EPSILON':
+                right = deepcopy(self.right)
+                self.node_type = right.node_type
+                self._left = right._left
+                self._letter = right._letter
+                self._right = right._right
+                self._inner = right._inner
+            elif self.right.node_type == 'EPSILON':
+                left = deepcopy(self.left)
+                self.node_type = left.node_type
+                self._left = left._left
+                self._letter = left._letter
+                self._right = left._right
+                self._inner = left._inner
         elif node_type == 'EPSILON':
             pass
         elif node_type == 'LETTER':
@@ -55,6 +77,9 @@ class RegularExpression:
             self._init_left_right(**kwargs)
         elif node_type == 'STAR':
             self._init_inner(**kwargs)
+            if self.inner.node_type == 'EPSILON':
+                self.node_type = 'EPSILON'
+                self._inner = None
         else:
             raise NotImplementedError(f'Unknown node type {node_type}')
 
@@ -73,7 +98,13 @@ class RegularExpression:
 
     def __str__(self) -> str:
         if self.node_type == 'CONCAT':
-            return str(self.left) + ' ' + str(self.right)
+            left_str = str(self.left)
+            right_str = str(self.right)
+            if self.left.node_type == 'PLUS':
+                left_str = '(' + left_str +')'
+            if self.right.node_type == 'PLUS':
+                right_str = '(' + right_str +')'
+            return left_str + ' ' + right_str
         if self.node_type == 'EPSILON':
             return 'ε'
         if self.node_type == 'LETTER':
