@@ -8,7 +8,7 @@ coverage: unittest
 .PHONY: doc
 doc:
 	sphinx-build -b html sphinx/ out/doc/
-	xdg-open out/doc/index.html
+	# xdg-open out/doc/index.html
 
 .PHONY: typecheck
 typecheck:
