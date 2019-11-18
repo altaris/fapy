@@ -1,4 +1,28 @@
-"""Regular expressions
+"""This module implements a lexer, parser, and a representation of regular
+expressions
+
+A regular expression over an alphabet :math:`A` is either:
+
+* :math:`\\epsilon`;
+* a letter :math:`a \\in A`;
+* (*concatenation*) an expression :math:`r r'`, where :math:`r` and :math:`r'`
+  are regular expressions;
+* (*sum*) an expression :math:`r + r'`, where :math:`r` and :math:`r'` are
+  regular expressions;
+* (*Kleene's star*) an expression :math:`r^*`, where :math:`r` is a regular
+  expression.
+
+Star binds stringer than concatenation, which itself binds stronger than sums.
+
+Here is a usage example::
+
+    regular_expression = parse_regular_expression('(a + b)* a (a + b)*')
+
+This regular expression accepts all words containing the letter :math:`a`.
+
+Warning:
+    Due to a limitation of the current lexer, concatenation binds weaker than
+    sums, although it should be the other way around.
 """
 
 from copy import (
@@ -19,7 +43,6 @@ from purplex import (
 )
 
 
-# pylint: disable=unused-import
 from fapy.common import (
     Alphabet,
     Letter
@@ -27,7 +50,22 @@ from fapy.common import (
 
 
 class RegularExpression:
-    """Regular expression abstract syntax tree
+    """Representation of regular expression my means of abstract syntax trees
+
+    To construct a :class:`RegularExpression`, use
+    :meth:`parse_regular_expression`.
+
+    Abstract syntax tree (AST) node types:
+
+    * ``CONCAT``: concatenation of the :attr:`RegularExpression._left` and
+      :attr:`RegularExpression._right` regular expressions;
+    * ``EPSILON``: the :math:`\\epsilon` regular expression;
+    * ``LETTER``: a regular expression matching letter
+      :attr:`RegularExpression._letter`;
+    * ``PLUS``: sum of the :attr:`RegularExpression._left` and
+      :attr:`RegularExpression._right` regular expressions;
+    * ``STAR``: star of the :attr:`RegularExpression._inner` regular
+      expression.
     """
 
     NODE_TYPES = (
@@ -39,12 +77,33 @@ class RegularExpression:
     )
 
     node_type: str
+    """The node type, among ``CONCAT``, ``EPSILON``, ``LETTER``, ``PLUS``,
+    ``STAR``"""
     _left = None  # type: Optional[RegularExpression]
+    """Left node, if applicable"""
     _letter = None  # type: Optional[Letter]
+    """Letter of the node, if applicable"""
     _right = None  # type: Optional[RegularExpression]
+    """Right node, if applicable"""
     _inner = None  # type: Optional[RegularExpression]
+    """Inner node, if applicable"""
 
     def __init__(self, node_type: str, **kwargs):
+        """Constructor
+
+        To construct a :class:`RegularExpression`, use
+        :meth:`parse_regular_expression`.
+
+        Args:
+            node_type: The type of the node, among ``CONCAT``, ``EPSILON``,
+            ``LETTER``, ``PLUS``, ``STAR``
+
+        Keyword Args:
+           inner: Inner node, if applicable
+           left: Left node, if applicable
+           letter: Letter of the node, if applicable
+           right: Right node, if applicable
+        """
         self.node_type = node_type
         if node_type == 'CONCAT':
             self._init_left_right(**kwargs)
@@ -84,6 +143,15 @@ class RegularExpression:
             raise NotImplementedError(f'Unknown node type {node_type}')
 
     def __repr__(self) -> str:
+        """Provides a string representation of the regular expression
+
+        For instance the regular expression `(a + ε) b*` is represented as
+        `CONCAT(PLUS(a, ε), STAR(b))`.
+
+        Raises:
+            NotImplementedError: If :attr:`RegularExpression.node_type` is
+                invalid
+        """
         if self.node_type == 'CONCAT':
             return 'CONCAT(' + repr(self.left) + ', ' + repr(self.right) + ')'
         if self.node_type == 'EPSILON':
@@ -97,6 +165,13 @@ class RegularExpression:
         raise NotImplementedError(f'Unknown node type {self.node_type}')
 
     def __str__(self) -> str:
+        """Provides a human-friendly string representation of the regular
+        expression
+
+        Raises:
+            NotImplementedError: If :attr:`RegularExpression.node_type` is
+                invalid
+        """
         if self.node_type == 'CONCAT':
             left_str = str(self.left)
             right_str = str(self.right)
@@ -116,14 +191,25 @@ class RegularExpression:
         raise NotImplementedError(f'Unknown node type {self.node_type}')
 
     def _init_inner(self, **kwargs) -> None:
-        """Inits the node with an inner ast (for e.g. STAR)
+        """Inits the node with an inner AST
+
+        Convenience method for :meth:`RegularExpression.__init__`.
+
+        Raises:
+            ValueError: If ``kwargs`` does not contain key ``inner``
         """
         if not kwargs.get('inner'):
             raise ValueError(f'Node type {self.node_type} expects inner ast')
         self._inner = kwargs.get('inner')
 
     def _init_left_right(self, **kwargs) -> None:
-        """Inits the node with a left and right ast (for e.g. CONCAT)
+        """Inits the node with an left and right AST
+
+        Convenience method for :meth:`RegularExpression.__init__`.
+
+        Raises:
+            ValueError: If ``kwargs`` does not contain key ``left`` or
+            ``right``
         """
         if not kwargs.get('left'):
             raise ValueError(f'Node type {self.node_type} expects left ast')
@@ -133,6 +219,17 @@ class RegularExpression:
         self._right = kwargs.get('right')
 
     def accepting_letters(self) -> Set[Letter]:
+        """Returns the accepting letters of the regular expression
+
+        A letter is *accepting* if there exist a word accepted by the regular
+        expression finishing with that letter. For example, the accepting
+        letters of :math:`(a + bc)^*` are :math:`a` and :math:`c`, but not
+        :math:`b`.
+
+        Raises:
+            NotImplementedError: If :attr:`RegularExpression.node_type` is
+                invalid
+        """
         if self.node_type == 'CONCAT':
             if self.right.accepts_epsilon():
                 return self.left.accepting_letters() | \
@@ -150,7 +247,12 @@ class RegularExpression:
         raise NotImplementedError(f'Unknown node type {self.node_type}')
 
     def accepts_epsilon(self) -> bool:
-        """Returns whether the regular expression accepts the empty word"""
+        """Returns whether the regular expression accepts the empty word
+
+        Raises:
+            NotImplementedError: If :attr:`RegularExpression.node_type` is
+                invalid
+        """
         if self.node_type == 'CONCAT':
             return self.left.accepts_epsilon() and self.right.accepts_epsilon()
         if self.node_type == 'EPSILON':
@@ -165,6 +267,14 @@ class RegularExpression:
 
     def alphabet(self) -> Alphabet:
         """Returns the alphabet of the regular expression
+
+        The alphabet of a regular expression is the set of all letters
+        appearing in it. For example, the alphabet of :math:`ac + c^*` is
+        :math:`\\{ a, c \\}`.
+
+        Raises:
+            NotImplementedError: If :attr:`RegularExpression.node_type` is
+                invalid
         """
         if self.node_type in ['CONCAT', 'PLUS']:
             return self.left.alphabet() | self.right.alphabet()
@@ -177,6 +287,16 @@ class RegularExpression:
         raise NotImplementedError(f'Unknown node type {self.node_type}')
 
     def initial_letters(self) -> Set[Letter]:
+        """Returns the initial letters of the regular expression
+
+        A letter is *initial* if there exist a word accepted by the regular
+        expression starting with that letter. For example, the initial letters
+        of :math:`(a + bc)^*` are :math:`a` and :math:`b`, but not :math:`c`.
+
+        Raises:
+            NotImplementedError: If :attr:`RegularExpression.node_type` is
+                invalid
+        """
         if self.node_type == 'CONCAT':
             if self.left.accepts_epsilon():
                 return self.left.initial_letters() | \
@@ -194,8 +314,28 @@ class RegularExpression:
         raise NotImplementedError(f'Unknown node type {self.node_type}')
 
     @property
+    def inner(self) -> 'RegularExpression':
+        """Asserts that :attr:`RegularExpression._inner` is not ``None``, and
+        returns it
+
+        Convenience function to product code that type-checks.
+
+        Raises:
+            ValueError: If :attr:`RegularExpression._inner` is ``None``
+        """
+        if not self._inner:
+            raise ValueError('Value of member "inner" is None')
+        return self._inner
+
+    @property
     def left(self) -> 'RegularExpression':
-        """Asserts that left is not None, and returns it
+        """Asserts that :attr:`RegularExpression._left` is not ``None``, and
+        returns it
+
+        Convenience function to product code that type-checks.
+
+        Raises:
+            ValueError: If :attr:`RegularExpression._left` is ``None``
         """
         if not self._left:
             raise ValueError('Value of member "left" is None')
@@ -203,15 +343,42 @@ class RegularExpression:
 
     @property
     def letter(self) -> Letter:
-        """Asserts that letter is not None, and returns it
+        """Asserts that :attr:`RegularExpression._letter` is not ``None``, and
+        returns it
+
+        Convenience function to product code that type-checks.
+
+        Raises:
+            ValueError: If :attr:`RegularExpression._letter` is ``None``
         """
         if not self._letter:
             raise ValueError('Value of member "letter" is None')
         return self._letter
 
+    @property
+    def right(self) -> 'RegularExpression':
+        """Asserts that :attr:`RegularExpression._right` is not ``None``, and
+        returns it
+
+        Convenience function to product code that type-checks.
+
+        Raises:
+            ValueError: If :attr:`RegularExpression._right` is ``None``
+        """
+        if not self._right:
+            raise ValueError('Value of member "right" is None')
+        return self._right
+
     def successors(self, letter: Letter) -> Set[Letter]:
-        """From a regular expression, returns all potential successors of a
-        given letter.
+        """Returns all potential successors of a given letter
+
+        For instance, in :math:`(a + bc)^*`, the successor set of :math:`a` is
+        :math:`\\{ b \\}`, the successor set of :math:`b` is :math:`\\{ c \\}`,
+        and the successor set of :math:`c` is :math:`\\{ a, b \\}`.
+
+        Raises:
+            NotImplementedError: If :attr:`RegularExpression.node_type` is
+                invalid
         """
         if self.node_type == 'CONCAT':
             if letter in self.left.accepting_letters():
@@ -232,25 +399,12 @@ class RegularExpression:
             return self.inner.successors(letter)
         raise NotImplementedError(f'Unknown node type {self.node_type}')
 
-    @property
-    def right(self) -> 'RegularExpression':
-        """Asserts that right is not None, and returns it
-        """
-        if not self._right:
-            raise ValueError('Value of member "right" is None')
-        return self._right
-
-    @property
-    def inner(self) -> 'RegularExpression':
-        """Asserts that inner is not None, and returns it
-        """
-        if not self._inner:
-            raise ValueError('Value of member "inner" is None')
-        return self._inner
-
 
 class ReLexer(Lexer):
     """Regular expression lexer
+
+    See also:
+        `Purplex homepage <https://github.com/mtomwing/purplex>`_
     """
 
     EPSILON = TokenDef(r'ε')
@@ -264,6 +418,9 @@ class ReLexer(Lexer):
 
 class ReParser(Parser):
     """Regular expression parser
+
+    See also:
+        `Purplex homepage <https://github.com/mtomwing/purplex>`_
     """
 
     LEXER = ReLexer
@@ -274,37 +431,22 @@ class ReParser(Parser):
         (LEFT, 'PLUS')
     )
 
-    # pylint: disable=missing-docstring
-    # pylint: disable=no-self-use
-    # pylint: disable=unused-argument
     @attach('e : EPSILON')
     def epsilon(self, epsilon):
         return RegularExpression('EPSILON')
 
-    # pylint: disable=missing-docstring
-    # pylint: disable=no-self-use
-    # pylint: disable=unused-argument
     @attach('e : LETTER')
     def letter(self, letter):
         return RegularExpression('LETTER', letter=letter)
 
-    # pylint: disable=missing-docstring
-    # pylint: disable=no-self-use
-    # pylint: disable=unused-argument
     @attach('e : LPAREN e RPAREN')
     def parens(self, lparen, inner, rparen):
         return inner
 
-    # pylint: disable=missing-docstring
-    # pylint: disable=no-self-use
-    # pylint: disable=unused-argument
     @attach('e : e PLUS e')
     def addition(self, left, plus, right):
         return RegularExpression('PLUS', left=left, right=right)
 
-    # pylint: disable=missing-docstring
-    # pylint: disable=no-self-use
-    # pylint: disable=unused-argument
     @attach('e : e STAR')
     def star(self, inner, star):
         if inner.node_type == 'STAR':
@@ -312,9 +454,6 @@ class ReParser(Parser):
         else:
             return RegularExpression('STAR', inner=inner)
 
-    # pylint: disable=missing-docstring
-    # pylint: disable=no-self-use
-    # pylint: disable=unused-argument
     @attach('e : e e')
     def concat(self, left, right):
         if left.node_type == 'EPSILON':
@@ -325,6 +464,6 @@ class ReParser(Parser):
 
 
 def parse_regular_expression(string: str) -> RegularExpression:
-    """Parses a regular expression, returning an abstract syntax tree.
+    """Parses a regular expression, returning a `RegularExpression` object
     """
     return ReParser().parse(string)
