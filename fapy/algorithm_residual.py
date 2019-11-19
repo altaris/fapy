@@ -1,3 +1,15 @@
+"""Residual computation
+
+Given a langage :math:`\\mathcal{L}` over an alphabet :math:`\\Sigma`, and a
+word :math:`w \\in \\Sigma^*`, the *residual* :math:`w^{-1} \\mathcal{L}` of
+:math:`\\mathcal{L}` by :math:`w` is the langage :math:`\\{ u \\in \\Sigma^*
+\\mid wu \\in \\mathcal{L} \\}`.
+
+The main function of this module, :meth:`algorithm_residual.residual`, takes a
+:class:`regular_expression.RegularExpression` intead of an actual set of words,
+and returns a :class:`regular_expression.RegularExpression`.
+"""
+
 from typing import (
     Optional,
 )
@@ -10,8 +22,12 @@ from fapy.regular_expression import (
 def residual(
         regular_expression: Optional[RegularExpression],
         word: str) -> Optional[RegularExpression]:
-    """Returns the resitual regular expression, or None if the corresponding
-    residual is empty.
+    """Returns the resitual regular expression, or ``None`` if the corresponding
+    residual is empty
+
+    Raises:
+        NotImplementedError: If :attr:`RegularExpression.node_type` is
+            invalid
     """
 
     if not word:
