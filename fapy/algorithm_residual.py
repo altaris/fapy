@@ -14,9 +14,96 @@ from typing import (
     Optional,
 )
 
+from fapy.common import (
+    Letter
+)
 from fapy.regular_expression import (
     RegularExpression
 )
+
+
+def _residual_concat(
+        regular_expression: RegularExpression,
+        letter: Letter) -> Optional[RegularExpression]:
+    """Residual computation, ``CONCAT`` case
+    """
+    residual_left = residual(regular_expression.left, letter)
+    residual_right = residual(regular_expression.right, letter)
+    if regular_expression.left.accepts_epsilon():
+        if residual_left is not None and residual_right is not None:
+            return RegularExpression(
+                'PLUS',
+                left=RegularExpression(
+                    'CONCAT',
+                    left=residual_left,
+                    right=regular_expression.right
+                ),
+                right=residual_right
+            )
+        if residual_left is not None:
+            return RegularExpression(
+                'CONCAT',
+                left=residual_left,
+                right=regular_expression.right
+            )
+        if residual_right is not None:
+            return residual_right
+        return None
+    if residual_left is not None:
+        return RegularExpression(
+            'CONCAT',
+            left=residual_left,
+            right=regular_expression.right
+        )
+    return None
+
+
+def _residual_letter(
+        regular_expression: RegularExpression,
+        letter: Letter) -> Optional[RegularExpression]:
+    """Residual computation, ``LETTER`` case
+    """
+    if letter == regular_expression.letter:
+        return RegularExpression('EPSILON')
+    return None
+
+
+def _residual_plus(
+        regular_expression: RegularExpression,
+        letter: Letter) -> Optional[RegularExpression]:
+    """Residual computation, ``PLUS`` case
+    """
+    residual_left = residual(regular_expression.left, letter)
+    residual_right = residual(regular_expression.right, letter)
+    if residual_left is not None and residual_right is not None:
+        return RegularExpression(
+            'PLUS',
+            left=residual_left,
+            right=residual_right,
+        )
+    if residual_left is not None:
+        return residual_left
+    if residual_right is not None:
+        return residual_right
+    return None
+
+
+def _residual_star(
+        regular_expression: RegularExpression,
+        letter: Letter) -> Optional[RegularExpression]:
+    """Residual computation, ``STAR`` case
+    """
+    residual_inner = residual(regular_expression.inner, letter)
+    if residual_inner is not None:
+        return RegularExpression(
+            'CONCAT',
+            left=residual_inner,
+            right=RegularExpression(
+                'STAR',
+                inner=regular_expression.inner
+            )
+        )
+    return None
 
 
 def residual(
@@ -30,6 +117,8 @@ def residual(
             invalid
     """
 
+    if regular_expression is None:
+        return None
     if not word:
         return regular_expression
     if len(word) > 1:
@@ -37,74 +126,16 @@ def residual(
 
     letter = word[0]
 
-    if regular_expression is None:
-        return None
-
     if regular_expression.node_type == 'CONCAT':
-        residual_left = residual(regular_expression.left, letter)
-        residual_right = residual(regular_expression.right, letter)
-        if regular_expression.left.accepts_epsilon():
-            if residual_left is not None and residual_right is not None:
-                return RegularExpression(
-                    'PLUS',
-                    left=RegularExpression(
-                        'CONCAT',
-                        left=residual_left,
-                        right=regular_expression.right
-                    ),
-                    right=residual_right
-                )
-            if residual_left is not None:
-                return RegularExpression(
-                    'CONCAT',
-                    left=residual_left,
-                    right=regular_expression.right
-                )
-            if residual_right is not None:
-                return residual_right
-            return None
-        if residual_left is not None:
-            return RegularExpression(
-                'CONCAT',
-                left=residual_left,
-                right=regular_expression.right
-            )
-        return None
-
+        return _residual_concat(regular_expression, letter)
     if regular_expression.node_type == 'EPSILON':
         return None
-
     if regular_expression.node_type == 'LETTER':
-        if letter == regular_expression.letter:
-            return RegularExpression('EPSILON')
-        return None
-
+        return _residual_letter(regular_expression, letter)
     if regular_expression.node_type == 'PLUS':
-        residual_left = residual(regular_expression.left, letter)
-        residual_right = residual(regular_expression.right, letter)
-        if residual_left is not None and residual_right is not None:
-            return RegularExpression(
-                'PLUS',
-                left=residual_left,
-                right=residual_right,
-            )
-        if residual_left is not None:
-            return residual_left
-        if residual_right is not None:
-            return residual_right
-        return None
-
+        return _residual_plus(regular_expression, letter)
     if regular_expression.node_type == 'STAR':
-        residual_inner = residual(regular_expression.inner, letter)
-        if residual_inner is not None:
-            return RegularExpression(
-                'CONCAT',
-                left=residual_inner,
-                right=RegularExpression(
-                    'STAR',
-                    inner=regular_expression.inner
-                )
-            )
-        return None
-
-    raise NotImplementedError(f'Unknown node type {regular_expression.node_type}')
+        return _residual_star(regular_expression, letter)
+    raise NotImplementedError(
+        f'Unknown node type {regular_expression.node_type}'
+    )
