@@ -385,9 +385,7 @@ class RegularExpression:
                     self.right.successors(letter) | \
                     self.right.initial_letters()
             return self.left.successors(letter) | self.right.successors(letter)
-        if self.node_type == 'EPSILON':
-            return set()
-        if self.node_type == 'LETTER':
+        if self.node_type in ['EPSILON', 'LETTER']:
             return set()
         if self.node_type == 'PLUS':
             return self.left.successors(letter) | self.right.successors(letter)
@@ -417,6 +415,7 @@ class ReLexer(Lexer):
 
 
 # pylint: disable=missing-function-docstring
+# pylint: disable=no-self-use
 # pylint: disable=unused-argument
 class ReParser(Parser):
     """Regular expression parser
@@ -454,8 +453,7 @@ class ReParser(Parser):
     def star(self, inner, star):
         if inner.node_type == 'STAR':
             return RegularExpression('STAR', inner=inner.inner)
-        else:
-            return RegularExpression('STAR', inner=inner)
+        return RegularExpression('STAR', inner=inner)
 
     # @attach('e : e e')
     # def concat(self, left, right):
