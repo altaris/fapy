@@ -1,4 +1,16 @@
-"""Determinizes an automaton using the powerset method
+"""Implementation of the powerset determinization method
+
+Given a finite automaton is a tuple :math:`\\mathcal{A} = ( A, Q,
+Q_{\\mathrm{init}}, Q_{\\mathrm{acc}}, \\delta )`, this algorithm produces an
+equivalent deterministic automaton :math:`\\mathcal{A}' = ( A, \\mathcal{P}
+(Q), \\{ Q_{\\mathrm{init}} \\}, \\{ Q_{\\mathrm{acc}} \\}, \\gamma )`, where
+for :math:`S \\in \\mathcal{P} (Q)` an :math:`\\epsilon`-closed subset of
+states, and :math:`a \\in A` a letter, :math:`\\gamma (S, a)` is the
+:math:`\\epsilon`-closure of all states reachable from :math:`S` by reading
+:math:`a`.
+
+See also:
+    `Wikipedia page <https://en.wikipedia.org/wiki/Powerset_construction>`_
 """
 
 from copy import (
@@ -9,7 +21,6 @@ from typing import (
     List,
     Set,
     Tuple,
-    Union
 )
 
 from fapy.common import (
@@ -22,12 +33,22 @@ from fapy.finite_automaton import (
 
 
 def _state_identifier(state_set: Set[State]) -> str:
+    """Convenience function that provides a name for a set of states
+
+    Example::
+
+        _state_identifier({'q1', 'q2'})
+
+    return ``'q1,q2'``.
+    """
     state_list = list(state_set)
     state_list.sort()
     return ",".join([str(state) for state in state_list])
 
 
 def powerset_determinize(automaton: FiniteAutomaton) -> FiniteAutomaton:
+    """Implementation of the powerset determinization method
+    """
 
     initial_state_identifier = _state_identifier(automaton.initial_states)
     state_dict: Dict[str, Set[State]] = {
