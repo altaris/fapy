@@ -63,7 +63,7 @@ class GlushkovTest(unittest.TestCase):
         self.assertFalse(aut3.read("b"))
         self.assertFalse(aut3.read("bab"))
 
-        aut4 = glushkov(parse_regular_expression('(a (b + (bbabb))* c)*'))
+        aut4 = glushkov(parse_regular_expression('(a (b + bbabb)* c)*'))
         aut4.draw(
             name='GlushkovTest.test_glushkov.4'
         ).render(directory='out/', format='pdf')

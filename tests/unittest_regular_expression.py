@@ -130,7 +130,6 @@ class RegularExpressionTest(unittest.TestCase):
 class ReParserTest(unittest.TestCase):
 
     def test_parse(self):
-        parser = ReParser()
         problems = [
             ("ε", "ε"),
             ("a", "a"),
@@ -140,10 +139,13 @@ class ReParserTest(unittest.TestCase):
             ("b ε", "b"),
             ("ε b ε", "b"),
             ("ε ε ε", "ε"),
+            ("b ε ε", "b"),
             ("a*", "STAR(a)"),
             ("a**", "STAR(a)"),
             ("a + b", "PLUS(a, b)"),
             ("(a + b)", "PLUS(a, b)"),
+            ("a + ab", "PLUS(a, CONCAT(a, b))"),
+            ("ba + ab", "PLUS(CONCAT(b, a), CONCAT(a, b))"),
             ("a (a + ε) b", "CONCAT(CONCAT(a, PLUS(a, ε)), b)"),
             ("(a + b)*", "STAR(PLUS(a, b))"),
             ("(a + b*)aa b",
@@ -151,8 +153,9 @@ class ReParserTest(unittest.TestCase):
             ("a (a + b*)*", "CONCAT(a, STAR(PLUS(a, STAR(b))))"),
             ("((a))", "a")
         ]
-        for problem in problems:
+        for problem, solution in problems:
             self.assertEqual(
-                repr(parser.parse(problem[0])).replace(" ", ""),
-                problem[1].replace(" ", "")
+                repr(parse_regular_expression(problem)).replace(" ", ""),
+                solution.replace(" ", ""),
+                f'Failed regular expression: {problem}'
             )

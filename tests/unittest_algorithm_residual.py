@@ -55,22 +55,22 @@ class ResidualTest(unittest.TestCase):
 
         self.assertEqual(
             str(
-                residual(parse_regular_expression('((aa) + (bb)) cc'), 'a')
+                residual(parse_regular_expression('(aa + bb) cc'), 'a')
             ).replace(' ', ''),
             'acc'
         )
         self.assertEqual(
             str(
-                residual(parse_regular_expression('((aa) + (bb)) cc'), 'b')
+                residual(parse_regular_expression('(aa + bb) cc'), 'b')
             ).replace(' ', ''),
             'bcc'
         )
         self.assertIsNone(
-            residual(parse_regular_expression('((aa) + (bb)) cc'), 'c')
+            residual(parse_regular_expression('(aa + bb) cc'), 'c')
         )
         self.assertEqual(
             str(
-                residual(parse_regular_expression('((aa) + (ab)) cc'), 'a')
+                residual(parse_regular_expression('(aa + ab) cc'), 'a')
             ).replace(' ', ''),
             '(a+b)cc'
         )

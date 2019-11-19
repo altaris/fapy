@@ -19,14 +19,13 @@ Here is a usage example::
     regular_expression = parse_regular_expression('(a + b)* a (a + b)*')
 
 This regular expression accepts all words containing the letter :math:`a`.
-
-Warning:
-    Due to a limitation of the current lexer, concatenation binds weaker than
-    sums, although it should be the other way around.
 """
 
 from copy import (
     deepcopy
+)
+from re import (
+    sub
 )
 from typing import (
     Optional,
@@ -407,6 +406,7 @@ class ReLexer(Lexer):
         `Purplex homepage <https://github.com/mtomwing/purplex>`_
     """
 
+    CONCAT = TokenDef(r'-')
     EPSILON = TokenDef(r'ε')
     LETTER = TokenDef(r'\w')
     LPAREN = TokenDef(r'\(')
@@ -430,6 +430,7 @@ class ReParser(Parser):
 
     PRECEDENCE = (
         (LEFT, 'STAR'),
+        (LEFT, 'CONCAT'),
         (LEFT, 'PLUS')
     )
 
@@ -456,8 +457,16 @@ class ReParser(Parser):
         else:
             return RegularExpression('STAR', inner=inner)
 
-    @attach('e : e e')
-    def concat(self, left, right):
+    # @attach('e : e e')
+    # def concat(self, left, right):
+    #     if left.node_type == 'EPSILON':
+    #         return right
+    #     if right.node_type == 'EPSILON':
+    #         return left
+    #     return RegularExpression('CONCAT', left=left, right=right)
+
+    @attach('e : e CONCAT e')
+    def concat(self, left, concat, right):
         if left.node_type == 'EPSILON':
             return right
         if right.node_type == 'EPSILON':
@@ -466,6 +475,12 @@ class ReParser(Parser):
 
 
 def parse_regular_expression(string: str) -> RegularExpression:
-    """Parses a regular expression, returning a `RegularExpression` object
+    """Parses a regular expression, returning a
+    :class:`regular_expression.RegularExpression` object
     """
+    string = sub(
+        r'(?<=[\w\)\*])\s*(?=[\w\(])',
+        '-',
+        string
+    )
     return ReParser().parse(string)
