@@ -7,6 +7,6 @@ from typing import (
 )
 
 Letter = str
-Alphabet = Set[Letter]  # pylint: disable=invalid-name
+Alphabet = Set[Letter]
 State = str
 Word = List[Letter]

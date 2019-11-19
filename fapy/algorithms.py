@@ -1,3 +1,5 @@
+# pylint: disable=unused-import
+
 """Meta module for algorithms
 """
 
