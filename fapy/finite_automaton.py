@@ -25,8 +25,8 @@ that order::
         }
     )
 
-This example constructs an automaton over the alphabet :math:`\{ a, b \}` whose
-langage consists in all words containing the letter :math:`a`.
+This example constructs an automaton over the alphabet :math:`\\{ a, b \\}`
+whose langage consists in all words containing the letter :math:`a`.
 
 :Note on determinism: In `fapy`, automata are non deterministic. Being
   deterministic is a *property* that can be retrieved using
@@ -66,12 +66,12 @@ class FiniteAutomaton:
         If :math:`\\mathcal{A} = ( A, Q, Q_{\\mathrm{init}}, Q_{\\mathrm{acc}},
         \\delta )` and :math:`\\mathcal{A}' = ( A', Q', Q'_{\\mathrm{init}},
         Q'_{\\mathrm{acc}}, \\delta' )`, then :math:`\\mathcal{A} + \\mathcal{A}' =
-        ( A \cup A', Q + Q', Q_{\\mathrm{init}} + Q'_{\\mathrm{init}},
+        ( A \\cup A', Q + Q', Q_{\\mathrm{init}} + Q'_{\\mathrm{init}},
         Q_{\\mathrm{acc}} + Q'_{\\mathrm{acc}}, \\delta + \\delta' )`.
 
         If :math:`\\mathcal{L} (\\mathcal{A})` is the langage recognized by
         :math:`\\mathcal{A}`, then :math:`\\mathcal{L} (\\mathcal{A} +
-        \\mathcal{A}') = \\mathcal{L} (\\mathcal{A}) \cup \\mathcal{L}
+        \\mathcal{A}') = \\mathcal{L} (\\mathcal{A}) \\cup \\mathcal{L}
         (\\mathcal{A}')`.
         """
         if not isinstance(other, FiniteAutomaton):
@@ -89,16 +89,16 @@ class FiniteAutomaton:
 
         If :math:`\\mathcal{A} = ( A, Q, Q_{\\mathrm{init}}, Q_{\\mathrm{acc}},
         \\delta )` and :math:`\\mathcal{A}' = ( A', Q', Q'_{\\mathrm{init}},
-        Q'_{\\mathrm{acc}}, \\delta' )`, then :math:`\\mathcal{A} \cdot
-        \\mathcal{A}' = ( A \cup A', Q + Q', Q_{\\mathrm{init}},
-        Q'_{\\mathrm{acc}}, \\delta'')`, where :math:`\\delta''` is :math:`\\delta
-        + \\delta'` with the additional :math:`\epsilon`-transitions from all
-        accepting states of :math:`\\mathcal{A}` to all initial sates of
-        :math:`\\mathcal{A}'`.
+        Q'_{\\mathrm{acc}}, \\delta' )`, then :math:`\\mathcal{A} \\cdot
+        \\mathcal{A}' = ( A \\cup A', Q + Q', Q_{\\mathrm{init}},
+        Q'_{\\mathrm{acc}}, \\delta'')`, where :math:`\\delta''` is
+        :math:`\\delta + \\delta'` with the additional
+        :math:`\\epsilon`-transitions from all accepting states of
+        :math:`\\mathcal{A}` to all initial sates of :math:`\\mathcal{A}'`.
 
         If :math:`\\mathcal{L} (\\mathcal{A})` is the langage recognized by
         :math:`\\mathcal{A}`, then :math:`\\mathcal{L} (\\mathcal{A}
-        + \\mathcal{A}') = \\mathcal{L} (\\mathcal{A}) \cdot \\mathcal{L}
+        + \\mathcal{A}') = \\mathcal{L} (\\mathcal{A}) \\cdot \\mathcal{L}
         (\\mathcal{A}')`.
         """
         if not isinstance(other, FiniteAutomaton):
@@ -283,7 +283,7 @@ def letter_automaton(
 
 
     Args:
-        letter: The letter in question. It can be :math:`\epsilon` (even if
+        letter: The letter in question. It can be :math:`\\epsilon` (even if
             structly speaking, it is not a letter).
         initial_state: The name of the initial state. Defaults to ``q0``.
         accepting_state: The name of the accepting state. Defaults to ``q1``.

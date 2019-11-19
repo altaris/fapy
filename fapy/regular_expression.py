@@ -416,6 +416,8 @@ class ReLexer(Lexer):
     WHITESPACE = TokenDef(r'[\s\n]+', ignore=True)
 
 
+# pylint: disable=missing-function-docstring
+# pylint: disable=unused-argument
 class ReParser(Parser):
     """Regular expression parser
 

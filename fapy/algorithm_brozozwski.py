@@ -35,7 +35,6 @@ from fapy.common import (
     State
 )
 from fapy.finite_automaton import (
-    empty_word_automaton,
     FiniteAutomaton
 )
 from fapy.regular_expression import (
@@ -69,27 +68,27 @@ def brozozwski(automaton: FiniteAutomaton) -> RegularExpression:
     states_to_remove = list(automaton.states)
     states_to_remove.sort()
     while states_to_remove:
-        qi = states_to_remove.pop()
-        for qk in states_to_remove + [q_init, q_acc]:
-            if qk == qi:
+        q_i = states_to_remove.pop()
+        for q_k in states_to_remove + [q_init, q_acc]:
+            if q_k == q_i:
                 continue
-            for ql in states_to_remove + [q_init, q_acc]:
-                if ql == qi:
+            for q_l in states_to_remove + [q_init, q_acc]:
+                if q_l == q_i:
                     continue
-                e_kl = table[qk].get(ql, '')
-                e_ki = table[qk].get(qi, '')
-                e_ii = table[qi].get(qi, '')
-                e_il = table[qi].get(ql, '')
+                e_kl = table[q_k].get(q_l, '')
+                e_ki = table[q_k].get(q_i, '')
+                e_ii = table[q_i].get(q_i, '')
+                e_il = table[q_i].get(q_l, '')
                 e_kil = ''
                 if e_ii:
                     e_ii = '(' + e_ii + ')*'
                 if len(e_ki) > 0 and len(e_il) > 0:
                     e_kil = e_ki + e_ii + e_il
                 if len(e_kl) > 0 and len(e_kil) > 0:
-                    table[qk][ql] = f'({e_kl})+({e_kil})'
+                    table[q_k][q_l] = f'({e_kl})+({e_kil})'
                 elif not e_kl:
-                    table[qk][ql] = e_kil
+                    table[q_k][q_l] = e_kil
                 else:
-                    table[qk][ql] = e_kl
+                    table[q_k][q_l] = e_kl
 
     return parse_regular_expression(table[q_init].get(q_acc, ''))

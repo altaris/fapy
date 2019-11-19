@@ -38,7 +38,7 @@ def residual(
     letter = word[0]
 
     if regular_expression is None:
-            return None
+        return None
 
     if regular_expression.node_type == 'CONCAT':
         residual_left = residual(regular_expression.left, letter)
