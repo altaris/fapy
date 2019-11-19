@@ -10,6 +10,10 @@ doc:
 	sphinx-build -b html sphinx/ out/doc/
 	# xdg-open out/doc/index.html
 
+.PHONY: lint
+lint:
+	pylint fapy
+
 .PHONY: typecheck
 typecheck:
 	mypy fapy/*.py
