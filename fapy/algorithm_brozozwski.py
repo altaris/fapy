@@ -16,7 +16,6 @@ Example: consider::
             'q2': [('a', 'q0')]
         }
     )
-    print(brozozwski(automaton))
 
 The automaton recognizes all words starting with a number of :math:`a` that is
 a multiple of :math:`3`, and finishes with a :math:`b`. As expected, this
@@ -41,6 +40,44 @@ from fapy.regular_expression import (
     parse_regular_expression,
     RegularExpression
 )
+
+
+def _concat(left: str, right: str) -> str:
+    """Convenience function
+
+    Takes two string representations of regular expressions, where the empty
+    string is considered as matching the empty langage, and returns a string
+    representation of their concatenation.
+    """
+    if len(left) > 0 and len(right) > 0:
+        return left + right
+    return ''
+
+
+def _plus(left: str, right: str) -> str:
+    """Convenience function
+
+    Takes two string representations of regular expressions, where the empty
+    string is considered as matching the empty langage, and returns a string
+    representation of their sum.
+    """
+    if len(left) > 0 and len(right) > 0:
+        return left + '+' + right
+    if len(left) > 0:
+        return left
+    return right
+
+
+def _star(inner: str) -> str:
+    """Convenience function
+
+    Takes a string representations of a regular expression, where the empty
+    string is considered as matching the empty langage, and returns its star
+    regular expression.
+    """
+    if len(inner) > 0:
+        return f'({inner})*'
+    return 'ε'
 
 
 def brozozwski(automaton: FiniteAutomaton) -> RegularExpression:
@@ -79,16 +116,15 @@ def brozozwski(automaton: FiniteAutomaton) -> RegularExpression:
                 e_ki = table[q_k].get(q_i, '')
                 e_ii = table[q_i].get(q_i, '')
                 e_il = table[q_i].get(q_l, '')
-                e_kil = ''
-                if e_ii:
-                    e_ii = '(' + e_ii + ')*'
-                if len(e_ki) > 0 and len(e_il) > 0:
-                    e_kil = e_ki + e_ii + e_il
-                if len(e_kl) > 0 and len(e_kil) > 0:
-                    table[q_k][q_l] = f'({e_kl})+({e_kil})'
-                elif not e_kl:
-                    table[q_k][q_l] = e_kil
-                else:
-                    table[q_k][q_l] = e_kl
+                table[q_k][q_l] = _plus(
+                    e_kl,
+                    _concat(
+                        _concat(
+                            e_ki,
+                            _star(e_ii)
+                        ),
+                        e_il
+                    )
+                )
 
     return parse_regular_expression(table[q_init].get(q_acc, ''))
