@@ -1,4 +1,29 @@
-"""Glushkov's algorithm
+"""Implementation of Brozozwski's algorithm for regular expressions
+
+Brozozwski's algorithm transforms a finite automaton into an equivalent regular
+expression by iteratively removing states.
+
+Example: consider::
+
+    automaton = FiniteAutomaton(
+        alphabet={'a', 'b'},
+        states={'q0', 'q1', 'q2', 'q3'},
+        initial_states={'q0'},
+        accepting_states={'q3'},
+        transitions={
+            'q0': [('a', 'q1'), ('b', 'q3')],
+            'q1': [('a', 'q2')],
+            'q2': [('a', 'q0')]
+        }
+    )
+    print(brozozwski(automaton))
+
+The automaton recognizes all words starting with a number of :math:`a` that is
+a multiple of :math:`3`, and finishes with a :math:`b`. As expected, this
+snippet prints ``(a a a)* b``.
+
+Warning:
+    This is not Brozozwski's minimization algorithm.
 """
 
 from typing import (
@@ -20,13 +45,15 @@ from fapy.regular_expression import (
 
 
 def brozozwski(automaton: FiniteAutomaton) -> RegularExpression:
+    """Implementation of Brozozwski's algorithm for regular expressions
+    """
 
     q_init = 'init'
     q_acc = 'acc'
-    table = {
+    table: Dict[State, Dict[State, str]] = {
         q_acc: {},
         q_init: {}
-    }  # type: Dict[State, Dict[State, str]]
+    }
     for state in automaton.initial_states:
         table[q_init][state] = 'ε'
     for state in automaton.states:
