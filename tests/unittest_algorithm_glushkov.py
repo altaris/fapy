@@ -1,3 +1,6 @@
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
+
 """Unit tests
 """
 
@@ -22,7 +25,7 @@ class GlushkovTest(unittest.TestCase):
         self.assertEqual(
             repr(lin1).replace(' ', ''),
             'CONCAT(CONCAT(a0, STAR(PLUS(PLUS(a1, b2), ε))), a3)'
-                .replace(' ', '')
+            .replace(' ', '')
         )
         re2 = parse_regular_expression('a a a a a a a')
         lin2, idx2 = _linearize_regular_expression(re2)

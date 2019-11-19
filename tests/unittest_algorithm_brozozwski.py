@@ -1,3 +1,6 @@
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
+
 """Unit tests
 """
 
@@ -18,9 +21,6 @@ from fapy.common import (
 )
 from fapy.finite_automaton import (
     FiniteAutomaton
-)
-from fapy.regular_expression import (
-    parse_regular_expression,
 )
 
 
@@ -115,7 +115,7 @@ class BrozozwskiTest(unittest.TestCase):
             transitions={
                 'q0': [('a', 'q1')],
                 'q1': [('a', 'q2')],
-                'q1': [('a', 'q0')]
+                'q2': [('a', 'q0')]
             }
         )
         aut4_bro = brozozwski(aut4)

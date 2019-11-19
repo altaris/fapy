@@ -1,3 +1,6 @@
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
+
 """Unit tests
 """
 
@@ -5,8 +8,7 @@ import unittest
 
 # pylint: disable wrong-import-position
 from fapy.regular_expression import (
-    parse_regular_expression,
-    ReParser
+    parse_regular_expression
 )
 
 
@@ -149,7 +151,7 @@ class ReParserTest(unittest.TestCase):
             ("a (a + ε) b", "CONCAT(CONCAT(a, PLUS(a, ε)), b)"),
             ("(a + b)*", "STAR(PLUS(a, b))"),
             ("(a + b*)aa b",
-                "CONCAT(CONCAT(CONCAT(PLUS(a, STAR(b)), a), a), b)"),
+             "CONCAT(CONCAT(CONCAT(PLUS(a, STAR(b)), a), a), b)"),
             ("a (a + b*)*", "CONCAT(a, STAR(PLUS(a, STAR(b))))"),
             ("((a))", "a")
         ]

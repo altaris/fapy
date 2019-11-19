@@ -1,3 +1,6 @@
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
+
 """Unit tests
 """
 
@@ -7,12 +10,8 @@ import unittest
 from fapy.algorithm_thompson import (
     thompson
 )
-from fapy.finite_automaton import (
-    FiniteAutomaton
-)
 from fapy.regular_expression import (
-    parse_regular_expression,
-    RegularExpression
+    parse_regular_expression
 )
 
 
