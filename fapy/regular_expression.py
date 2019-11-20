@@ -87,6 +87,24 @@ class RegularExpression:
     _inner = None  # type: Optional[RegularExpression]
     """Inner node, if applicable"""
 
+    def __eq__(self, other) -> bool:
+        """Compares two regular expressions using their AST
+        """
+        if not isinstance(other, RegularExpression):
+            raise NotImplementedError
+        if self.node_type != other.node_type:
+            return False
+        if self.node_type in ['CONCAT', 'PLUS']:
+            return (self.left == other.left) and \
+                 (self.right == other.right)
+        if self.node_type == 'EPSILON':
+            return True
+        if self.node_type == 'LETTER':
+            return (self.letter == other.letter)
+        if self.node_type == 'STAR':
+            return (self.inner == other.inner)
+        raise NotImplementedError(f'Unknown node type {self.node_type}')
+
     def __init__(self, node_type: str, **kwargs):
         """Constructor
 
@@ -133,6 +151,13 @@ class RegularExpression:
             self._letter = kwargs.get('letter')
         elif node_type == 'PLUS':
             self._init_left_right(**kwargs)
+            if self.left == self.right:
+                left = deepcopy(self.left)
+                self.node_type = left.node_type
+                self._left = left._left
+                self._letter = left._letter
+                self._right = left._right
+                self._inner = left._inner
         elif node_type == 'STAR':
             self._init_inner(**kwargs)
             if self.inner.node_type == 'EPSILON':

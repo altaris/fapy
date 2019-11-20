@@ -11,13 +11,21 @@ and returns a :class:`regular_expression.RegularExpression`.
 """
 
 from typing import (
+    Dict,
+    List,
     Optional,
+    Tuple
 )
 
 from fapy.common import (
-    Letter
+    Letter,
+    State
+)
+from fapy.finite_automaton import (
+    FiniteAutomaton
 )
 from fapy.regular_expression import (
+    parse_regular_expression,
     RegularExpression
 )
 
@@ -106,6 +114,15 @@ def _residual_star(
     return None
 
 
+def _state_identifier(regular_expression: Optional[RegularExpression]) -> str:
+    """Convenience function that provides a string representation of an
+    ``Optional[regular_expression.RegularExpression]``
+    """
+    if regular_expression is None:
+        return ''
+    return str(regular_expression).replace(' ', '')
+
+
 def residual(
         regular_expression: Optional[RegularExpression],
         word: str) -> Optional[RegularExpression]:
@@ -138,4 +155,41 @@ def residual(
         return _residual_star(regular_expression, letter)
     raise NotImplementedError(
         f'Unknown node type {regular_expression.node_type}'
+    )
+
+
+def residual_automaton(
+        regular_expression: RegularExpression) -> FiniteAutomaton:
+    """From a regular expression, constructs an equivalent finite automaton
+    using the residuals method
+    """
+
+    initial_state = _state_identifier(regular_expression)
+    accepting_states = []
+    alphabet = regular_expression.alphabet()
+    transitions: Dict[State, List[Tuple[Letter, State]]] = {}
+    unexplored_states = [initial_state]
+
+    while unexplored_states:
+        state = unexplored_states.pop(0)
+        state_re = parse_regular_expression(state)
+        if state_re.accepts_epsilon():
+            accepting_states.append(state)
+        transitions[state] = []
+        for letter in alphabet:
+            next_residual = residual(state_re, letter)
+            next_state = _state_identifier(next_residual)
+            if next_residual is not None:
+                transitions[state].append((letter, next_state))
+                # Equivalent re can have different string representations...
+                if next_state not in transitions:
+                    transitions[next_state] = []
+                    unexplored_states.append(next_state)
+
+    return FiniteAutomaton(
+        alphabet=alphabet,
+        states=set(transitions.keys()),
+        initial_states={initial_state},
+        accepting_states=set(accepting_states),
+        transitions=transitions
     )
