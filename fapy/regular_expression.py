@@ -186,6 +186,8 @@ class RegularExpression:
         if self.node_type == 'PLUS':
             return str(self.left) + ' + ' + str(self.right)
         if self.node_type == 'STAR':
+            if self.inner.node_type == 'LETTER':
+                return str(self.inner) + '*'
             return '(' + str(self.inner) + ')*'
         raise NotImplementedError(f'Unknown node type {self.node_type}')
 
