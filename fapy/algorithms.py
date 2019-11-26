@@ -4,6 +4,7 @@
 """
 
 from fapy.algorithm_brozozwski import brozozwski
+from fapy.algorithm_brozozwski_minimize import brozozwski_minimize
 from fapy.algorithm_glushkov import glushkov
 from fapy.algorithm_powerset_determinize import powerset_determinize
 from fapy.algorithm_thompson import thompson
