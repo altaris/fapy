@@ -90,7 +90,7 @@ def powerset_determinize(automaton: FiniteAutomaton) -> FiniteAutomaton:
     return FiniteAutomaton(
         alphabet=deepcopy(automaton.alphabet),
         states=states,
-        initial_states=set([_state_identifier(automaton.initial_states)]),
+        initial_states={initial_state_identifier},
         accepting_states=accepting_states,
         transitions=transitions
     )

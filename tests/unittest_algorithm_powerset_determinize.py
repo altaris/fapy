@@ -20,10 +20,11 @@ class PowerSetDeterminizeTest(unittest.TestCase):
     def test_powerset_determinize(self):
         ndfa = FiniteAutomaton(
             alphabet={'a', 'b'},
-            states={'q0', 'q1', 'q2'},
-            initial_states={'q0'},
+            states={'q-1', 'q0', 'q1', 'q2'},
+            initial_states={'q-1'},
             accepting_states={'q2'},
             transitions={
+                'q-1': [('ε', 'q0')],
                 'q0': [('a', 'q0'), ('b', 'q0'), ('a', 'q1')],
                 'q1': [('a', 'q1'), ('b', 'q1'), ('ε', 'q2')]
             }
