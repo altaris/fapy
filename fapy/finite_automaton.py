@@ -188,9 +188,9 @@ class FiniteAutomaton:
         graph.node('', shape='point')
         for state in self.states:
             if state in self.accepting_states:
-                graph.node(str(state), shape='doublecircle')
+                graph.node(str(state), shape='box', peripheries='2')
             else:
-                graph.node(str(state), shape='circle')
+                graph.node(str(state), shape='box')
             if state in self.initial_states:
                 graph.edge('', str(state))
         for state in self.transitions:
