@@ -14,6 +14,50 @@ from fapy.regular_expression import (
 
 class RegularExpressionTest(unittest.TestCase):
 
+    def test___eq__(self):
+        self.assertEqual(
+            parse_regular_expression('a'),
+            parse_regular_expression('a')
+        )
+        self.assertNotEqual(
+            parse_regular_expression('a'),
+            parse_regular_expression('b')
+        )
+        self.assertEqual(
+            parse_regular_expression('ε'),
+            parse_regular_expression('ε')
+        )
+        self.assertNotEqual(
+            parse_regular_expression('ε'),
+            parse_regular_expression('b')
+        )
+        self.assertEqual(
+            parse_regular_expression('a + b'),
+            parse_regular_expression('a + b')
+        )
+        self.assertNotEqual(
+            parse_regular_expression('a'),
+            parse_regular_expression('a + b')
+        )
+        self.assertNotEqual(
+            parse_regular_expression('b + a'),
+            parse_regular_expression('a + b')
+        )
+        self.assertEqual(
+            parse_regular_expression('(a + b)* c'),
+            parse_regular_expression('(a + b)* c')
+        )
+        self.assertNotEqual(
+            parse_regular_expression('(a + b)* c'),
+            parse_regular_expression('a* c')
+        )
+        self.assertNotEqual(
+            parse_regular_expression('(a + b)* c'),
+            parse_regular_expression('(a + b) c')
+        )
+
+
+
     def test_accepting_letters(self):
         self.assertEqual(
             parse_regular_expression("ε").accepting_letters(),

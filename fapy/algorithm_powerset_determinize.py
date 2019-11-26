@@ -50,9 +50,10 @@ def powerset_determinize(automaton: FiniteAutomaton) -> FiniteAutomaton:
     """Implementation of the powerset determinization method
     """
 
-    initial_state_identifier = _state_identifier(automaton.initial_states)
+    initial_state = automaton.epsilon_closure(automaton.initial_states)
+    initial_state_identifier = _state_identifier(initial_state)
     state_dict: Dict[str, Set[State]] = {
-        initial_state_identifier: automaton.initial_states
+        initial_state_identifier: initial_state
     }
 
     unexplored_state_identifiers: List[str] = [initial_state_identifier]
@@ -64,11 +65,14 @@ def powerset_determinize(automaton: FiniteAutomaton) -> FiniteAutomaton:
         transitions[state_identifier] = []
         arrows: Dict[Letter, Set[State]] = {}
         for state in state_dict[state_identifier]:
-            for letter, next_state in automaton.transitions[state]:
+            for letter, next_state in automaton.transitions.get(state, []):
+                if letter == 'ε':
+                    continue
                 if letter not in arrows:
                     arrows[letter] = set()
                 arrows[letter].add(next_state)
         for letter in arrows:
+            arrows[letter] = automaton.epsilon_closure(arrows[letter])
             next_state_identifier = _state_identifier(arrows[letter])
             if next_state_identifier not in state_dict:
                 state_dict[next_state_identifier] = arrows[letter]
